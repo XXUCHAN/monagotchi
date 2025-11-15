@@ -1,30 +1,12 @@
-import { Contract } from 'ethers'
+import { Contract, type InterfaceAbi } from 'ethers'
 import { useMemo } from 'react'
 import { useWallet } from './useWallet'
 import { CONTRACTS } from '../utils/constants'
+import VolatilityCatsArtifact from '../abi/VolatilityCats.json'
+import ChurrTokenArtifact from '../abi/ChurrToken.json'
 
-// Minimal ABI for VolatilityCats contract
-const CATS_ABI = [
-  'function mintCat(uint8 clan) external',
-  'function getCat(uint256 tokenId) external view returns (tuple(tuple(uint8 clan, uint8 temperament, uint8 fortuneTier, uint8 rarityTier, int32 birthTrendBps, uint32 birthVolBucket, uint64 epochId, uint64 entropy) imprint, tuple(uint32 power, uint16 season, uint8 rulesVersion, uint64 lastMissionDaily, uint64 lastMissionWeekly, uint64 lastMissionMonthly, bool rewarded) game))',
-  'function completeMission(uint256 tokenId, uint8 missionType) external',
-  'function claimReward(uint256 tokenId) external',
-  'function ownerOf(uint256 tokenId) external view returns (address)',
-  'function balanceOf(address owner) external view returns (uint256)',
-  'function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)',
-  'event CatMinted(uint256 indexed tokenId, address indexed owner, uint8 clan)',
-  'event MissionCompleted(uint256 indexed tokenId, uint8 missionType, uint256 newPower)',
-  'event RewardClaimed(uint256 indexed tokenId, address indexed owner, uint256 amount)',
-]
-
-// Minimal ABI for ChurrToken contract
-const CHURR_ABI = [
-  'function balanceOf(address account) external view returns (uint256)',
-  'function totalSupply() external view returns (uint256)',
-  'function decimals() external view returns (uint8)',
-  'function symbol() external view returns (string)',
-  'function name() external view returns (string)',
-]
+const CATS_ABI = VolatilityCatsArtifact.abi as InterfaceAbi
+const CHURR_ABI = ChurrTokenArtifact.abi as InterfaceAbi
 
 export function useContract() {
   const { getProvider, getSigner } = useWallet()
@@ -55,7 +37,7 @@ export function useContract() {
   // Mint a cat
   const mintCat = async (clan: number) => {
     const contract = await getCatsContractWithSigner()
-    const tx = await contract.mintCat(clan)
+    const tx = await contract.mintRandomCat(clan)
     return tx
   }
 
@@ -68,9 +50,9 @@ export function useContract() {
   }
 
   // Complete mission
-  const completeMission = async (tokenId: bigint, missionType: number) => {
+  const runMission = async (tokenId: bigint, missionType: number) => {
     const contract = await getCatsContractWithSigner()
-    const tx = await contract.completeMission(tokenId, missionType)
+    const tx = await contract.runMission(tokenId, missionType)
     return tx
   }
 
@@ -112,7 +94,7 @@ export function useContract() {
     churrContract,
     mintCat,
     getCat,
-    completeMission,
+    runMission,
     claimReward,
     getUserCatCount,
     getUserCatTokenIds,

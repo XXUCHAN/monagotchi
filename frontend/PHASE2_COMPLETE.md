@@ -8,19 +8,23 @@
 ## 📦 Created Files
 
 ### 1. **Utils**
+
 - ✅ `src/utils/constants.ts` - Game constants & contract addresses
 - ✅ `src/utils/helpers.ts` - Utility functions
 - ✅ `src/utils/designSystem.ts` - Design system (Phase 1)
 
 ### 2. **Hooks**
+
 - ✅ `src/hooks/useWallet.ts` - Privy wallet management
 - ✅ `src/hooks/useContract.ts` - Contract interaction
 - ✅ `src/hooks/index.ts` - Hooks exports
 
 ### 3. **Types**
+
 - ✅ `src/types/index.ts` - Updated with contract types
 
 ### 4. **Components** (Phase 1)
+
 - ✅ `src/components/Header.tsx`
 - ✅ `src/components/HeroSection.tsx`
 - ✅ `src/components/FeatureCard.tsx`
@@ -34,6 +38,7 @@
 ## 🎯 Phase 2 Features
 
 ### 1. **Constants** (`utils/constants.ts`)
+
 ```typescript
 - CONTRACTS: { CATS, CHURR }
 - NETWORK: { chainId, rpcUrl, blockExplorer }
@@ -44,49 +49,53 @@
 ```
 
 ### 2. **Helper Functions** (`utils/helpers.ts`)
+
 ```typescript
-- shortenAddress()        // "0x1234...5678"
-- formatTimeRemaining()   // "2h 30m"
-- formatDate()
-- getRemainingCooldown()
-- isMissionReady()
-- getExplorerTxUrl()
-- formatTokenAmount()
-- copyToClipboard()
-- parseContractError()
+-shortenAddress() - // "0x1234...5678"
+    formatTimeRemaining() - // "2h 30m"
+    formatDate() -
+    getRemainingCooldown() -
+    isMissionReady() -
+    getExplorerTxUrl() -
+    formatTokenAmount() -
+    copyToClipboard() -
+    parseContractError();
 ```
 
 ### 3. **Wallet Hook** (`hooks/useWallet.ts`)
+
 ```typescript
-const { 
-  authenticated,
-  walletAddress,
-  getSigner,        // For write operations
-  getProvider,      // For read operations
-  switchNetwork,
-} = useWallet()
+const {
+    authenticated,
+    walletAddress,
+    getSigner, // For write operations
+    getProvider, // For read operations
+    switchNetwork,
+} = useWallet();
 ```
 
 ### 4. **Contract Hook** (`hooks/useContract.ts`)
+
 ```typescript
 const {
-  mintCat,              // Mint new cat
-  getCat,               // Get cat data
-  completeMission,      // Complete mission
-  claimReward,          // Claim reward
-  getUserCatTokenIds,   // Get user's cats
-  getChurrBalance,      // Get CHURR balance
-} = useContract()
+    mintCat, // Mint new cat
+    getCat, // Get cat data
+    completeMission, // Complete mission
+    claimReward, // Claim reward
+    getUserCatTokenIds, // Get user's cats
+    getChurrBalance, // Get CHURR balance
+} = useContract();
 ```
 
 ### 5. **TypeScript Types** (`types/index.ts`)
+
 ```typescript
-- OracleImprint        // Cat birth data
-- CatGameState         // Cat game stats
-- Cat                  // Complete cat data
-- CatDisplay           // Simplified for UI
-- MissionInfo          // Mission data
-- TxStatus             // Transaction status
+-OracleImprint - // Cat birth data
+    CatGameState - // Cat game stats
+    Cat - // Complete cat data
+    CatDisplay - // Simplified for UI
+    MissionInfo - // Mission data
+    TxStatus; // Transaction status
 ```
 
 ---
@@ -96,6 +105,7 @@ const {
 Minimal ABIs added to `useContract.ts`:
 
 ### VolatilityCats
+
 - `mintCat(clan)`
 - `getCat(tokenId)`
 - `completeMission(tokenId, missionType)`
@@ -104,6 +114,7 @@ Minimal ABIs added to `useContract.ts`:
 - `tokenOfOwnerByIndex(address, index)`
 
 ### ChurrToken (CHURR)
+
 - `balanceOf(address)`
 - `totalSupply()`
 - `decimals()`
@@ -113,6 +124,7 @@ Minimal ABIs added to `useContract.ts`:
 ## 📋 Environment Variables
 
 Updated `.env.example`:
+
 ```bash
 VITE_PRIVY_APP_ID=your_app_id_here
 VITE_RPC_URL=https://testnet.monad.xyz
@@ -155,53 +167,55 @@ src/
 ## 🚀 Usage Examples
 
 ### Mint a Cat
+
 ```typescript
 import { useContract } from './hooks'
 import { CLAN } from './utils/constants'
 
 function MintButton() {
   const { mintCat } = useContract()
-  
+
   const handleMint = async () => {
     const tx = await mintCat(CLAN.BTC)
     await tx.wait()
   }
-  
+
   return <button onClick={handleMint}>Mint Bitcoin Cat</button>
 }
 ```
 
 ### Get User's Cats
+
 ```typescript
-import { useWallet, useContract } from './hooks'
+import { useWallet, useContract } from './hooks';
 
 function MyCats() {
-  const { walletAddress } = useWallet()
-  const { getUserCatTokenIds, getCat } = useContract()
-  
-  const loadCats = async () => {
-    const tokenIds = await getUserCatTokenIds(walletAddress)
-    const cats = await Promise.all(
-      tokenIds.map(id => getCat(id))
-    )
-    return cats
-  }
+    const { walletAddress } = useWallet();
+    const { getUserCatTokenIds, getCat } = useContract();
+
+    const loadCats = async () => {
+        const tokenIds = await getUserCatTokenIds(walletAddress);
+        const cats = await Promise.all(tokenIds.map(id => getCat(id)));
+        return cats;
+    };
 }
 ```
 
 ### Check Mission Status
-```typescript
-import { isMissionReady, getRemainingCooldown } from './utils/helpers'
-import { COOLDOWN_TIMES, MISSION_TYPE } from './utils/constants'
 
-const lastDaily = 1700000000
-const isReady = isMissionReady(lastDaily, COOLDOWN_TIMES[MISSION_TYPE.DAILY])
-const remaining = getRemainingCooldown(lastDaily, COOLDOWN_TIMES[MISSION_TYPE.DAILY])
+```typescript
+import { isMissionReady, getRemainingCooldown } from './utils/helpers';
+import { COOLDOWN_TIMES, MISSION_TYPE } from './utils/constants';
+
+const lastDaily = 1700000000;
+const isReady = isMissionReady(lastDaily, COOLDOWN_TIMES[MISSION_TYPE.DAILY]);
+const remaining = getRemainingCooldown(lastDaily, COOLDOWN_TIMES[MISSION_TYPE.DAILY]);
 ```
 
 ---
 
 ## ✅ Linter Status
+
 **All files**: ✅ No errors
 
 ---
@@ -222,6 +236,7 @@ Phase 3 will focus on building actual game components:
 ## 🎉 Phase 2 Summary
 
 **What's Ready:**
+
 - ✅ Complete type system
 - ✅ Wallet management (Privy)
 - ✅ Contract interaction hooks
@@ -230,6 +245,7 @@ Phase 3 will focus on building actual game components:
 - ✅ Modern UI components
 
 **Ready for:**
+
 - Phase 3: Build game UI components
 - Phase 4: Integrate with smart contracts
 - Phase 5: Testing & deployment
@@ -240,4 +256,3 @@ Phase 3 will focus on building actual game components:
 **Total Lines of Code**: ~800+
 **Linter Errors**: 0
 **TypeScript Strict**: ✅
-
