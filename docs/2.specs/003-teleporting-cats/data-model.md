@@ -4,36 +4,26 @@
 
 ```typescript
 interface TeleportState {
-    uint32 currentChainId;      // 현재 체인
-    uint32 homeChainId;         // 민팅 체인
-    uint64 lastTeleportAt;      // 마지막 텔레포트 타임스탬프
-    uint256 visitedChainsBitmap;// 최대 256개 체인까지 방문 여부 기록
-    uint8 teleportCount;        // 총 텔레포트 횟수
-    uint8 uniqueChains;         // 고유 방문 체인 수 (<=32)
-    bool isAlive;               // 사망 여부
-    bool jackpotEligible;       // Grand Tour 조건 충족 여부
-    bool jackpotClaimed;        // 잭팟 수령 여부
+    uint32 currentChainId;        // 기본 0 (home)
+    uint32 visitedChainsBitmap;   // bit i == 1 → 체인 i 방문
+    uint8 teleportCount;          // 총 hop 수
+    uint8 uniqueChainsVisited;    // 고유 방문 체인 수
+    uint64 lastTeleportAt;        // 쿨다운 계산용
+    bool isAlive;                 // Post-MVP death flag
+    bool jackpotEligible;         // Grand Tour 목표 달성 여부
 }
 
-interface JackpotVault {
-    uint256 pool;               // 누적된 CHURR 혹은 ETH
-    uint16 jackpotFeeBps;       // 텔레포트/미션 수수료 비율
-    uint8 minUniqueChains;      // Grand Tour 목표 (기본 5)
-    uint64 lastTopUpAt;
+interface JackpotState {
+    uint256 balance;   // 누적 CHURR
+    bool claimed;      // 이미 지급 여부
+    address winner;    // Grand Tour 최초 달성자
+    uint8 targetChains;// 기본 5
 }
 
-interface DailyTreatState {
-    mapping(address => uint64) lastClaimAt; // 하루 1회 제한
-    uint256 treatAmount;                    // 1회 보상
-    address rewardToken;                    // CHURR (ERC20) or Treat token
-}
-
-interface TeleportSettings {
-    uint16 powerCostPerHop;      // 예: 10
-    uint16 minPowerToTeleport;   // 텔레포트 최소 파워
-    uint32 teleportCooldown;     // 초 단위
-    uint16 baseDeathBps;         // 기본 사망 확률(0-10000)
-    uint16 powerSafetyPerPointBps;// 파워당 사망 확률 감소량
+interface JackpotFeeConfig {
+    uint256 mintFee;      // 1 CHURR
+    uint256 missionFee;   // 0.2 CHURR
+    uint256 teleportFee;  // 1 CHURR
 }
 
 interface VolatilityCatExtended {
@@ -41,15 +31,15 @@ interface VolatilityCatExtended {
     OracleImprint imprint;
     CatGameState game;
     TeleportState teleport;
+    address owner;
 }
 ```
 
 ## Relationships
 
-- **VolatilityCatExtended.teleport.currentChainId → ChainRegistry**: 체인 ID ↔ 인덱스 매핑 테이블과 연결.
-- **TeleportState.visitedChainsBitmap ↔ JackpotVault.minUniqueChains**: 고유 방문 수가 목표 이상이면 잭팟 자격 부여.
-- **JackpotVault.pool ↔ Fee Sources**: 텔레포트/미션/claim 트랜잭션의 fee가 vault로 유입.
-- **DailyTreatState.lastClaimAt ↔ CHURR token**: treat 지급 시 CHURR balances 전송.
+- **VolatilityCatExtended.teleport.currentChainId**: 체인 인덱스는 0(홈)~5(원정)까지 하드코딩.
+- **TeleportState.visitedChainsBitmap ↔ JackpotState.targetChains**: 고유 방문 수가 목표 이상이면 잭팟 자격 부여.
+- **JackpotState.balance ↔ Fee Sources**: 민팅/미션/텔레포트 시 mint한 CHURR이 컨트랙트에 누적된다.
 
 ## Validation Rules
 

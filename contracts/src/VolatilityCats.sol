@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {IChurrToken} from "./interfaces/IChurrToken.sol";
 import {AssetRegistry} from "./registry/AssetRegistry.sol";
 import {PriceFeedGuard} from "./libraries/PriceFeedGuard.sol";
@@ -17,6 +16,11 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
     error MissionCooldown(uint256 remainingSeconds);
     error PowerTooLow(uint256 currentPower, uint256 requiredPower);
     error AlreadyClaimed();
+    error TeleportCooldown(uint256 remainingSeconds);
+    error TeleportPowerTooLow(uint256 currentPower, uint256 requiredPower);
+    error TeleportDestinationNotAllowed(uint32 destination);
+    error CatInactive();
+    error JackpotPayoutFailed();
 
     // Oracle Imprint 구조체
     struct OracleImprint {
@@ -39,6 +43,16 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
         uint64 lastMissionWeekly; // 마지막 Weekly 미션 타임스탬프
         uint64 lastMissionMonthly; // 마지막 Monthly 미션 타임스탬프
         bool rewarded; // 보상 수령 여부
+    }
+
+    struct TeleportState {
+        uint32 currentChainId;
+        uint32 visitedChainsBitmap;
+        uint8 teleportCount;
+        uint8 uniqueChainsVisited;
+        uint64 lastTeleportAt;
+        bool isAlive;
+        bool jackpotEligible;
     }
 
     // 고양이 전체 상태 구조체
@@ -65,6 +79,24 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
         address indexed owner,
         uint256 amount
     );
+    event TeleportCompleted(
+        uint256 indexed tokenId,
+        uint32 indexed fromChainId,
+        uint32 indexed toChainId,
+        uint8 teleportCount,
+        uint32 visitedBitmap,
+        bytes32 payloadHash
+    );
+    event JackpotAccrued(
+        bytes32 indexed source,
+        uint256 amount,
+        uint256 newBalance
+    );
+    event JackpotAwarded(
+        uint256 indexed tokenId,
+        address indexed winner,
+        uint256 amount
+    );
 
     // 상수들
     uint256 private constant REWARD_AMOUNT = 10 ether; // 10 CHURR 토큰
@@ -72,15 +104,32 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
     uint256 private constant DAILY_COOLDOWN = 12 hours;
     uint256 private constant WEEKLY_COOLDOWN = 7 days;
     uint256 private constant MONTHLY_COOLDOWN = 30 days;
+    uint8 private constant GRAND_TOUR_TARGET = 5;
+    uint32 private constant TELEPORT_COOLDOWN = 1 hours;
+    uint32 private constant TELEPORT_POWER_COST = 5;
+    uint32 private constant HOME_CHAIN_ID = 0;
+    uint32 private constant MAX_CHAIN_ID = 5;
+    uint256 private constant JACKPOT_FEE_PER_MINT = 1 ether;
+    uint256 private constant JACKPOT_FEE_PER_MISSION = 0.2 ether;
+    uint256 private constant JACKPOT_FEE_PER_TELEPORT = 1 ether;
+    bytes32 private constant JACKPOT_SOURCE_MINT = keccak256("JACKPOT_MINT");
+    bytes32 private constant JACKPOT_SOURCE_MISSION =
+        keccak256("JACKPOT_MISSION");
+    bytes32 private constant JACKPOT_SOURCE_TELEPORT =
+        keccak256("JACKPOT_TELEPORT");
 
     // 상태 변수들
     uint256 private nextTokenId;
     uint32 private epochWindow; // 에폭 계산용 윈도우 (초 단위)
 
     mapping(uint256 => Cat) private cats;
+    mapping(uint256 => TeleportState) private teleportStates;
     AssetRegistry private assetRegistry;
 
     IChurrToken private fishToken;
+    uint256 private jackpotPool;
+    bool private jackpotClaimed;
+    address private jackpotWinner;
 
     constructor(
         address _fishToken,
@@ -198,17 +247,17 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
         bytes32 assetId = getAssetIdFromClan(clan);
         if (!assetRegistry.isAssetEnabled(assetId)) revert InvalidClan();
 
-        // 민트 시점의 가격 데이터 가져오기 (로깅용)
-        address feedAddress = assetRegistry.getAssetFeed(assetId);
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(feedAddress);
-        (, int256 currentPrice, , uint256 priceTimestamp, ) = priceFeed
-            .latestRoundData();
+        PriceFeedGuard.PriceData memory priceData = _getPriceData(assetId);
 
         uint256 tokenId = nextTokenId++;
         _mint(msg.sender, tokenId);
 
         // Oracle Imprint 생성
-        OracleImprint memory imprint = _generateOracleImprint(clan);
+        OracleImprint memory imprint = _generateOracleImprint(
+            clan,
+            assetId,
+            priceData
+        );
         CatGameState memory gameState = CatGameState({
             power: 0,
             season: 1,
@@ -220,36 +269,34 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
         });
 
         cats[tokenId] = Cat(imprint, gameState);
+        teleportStates[tokenId] = TeleportState({
+            currentChainId: HOME_CHAIN_ID,
+            visitedChainsBitmap: _chainMask(HOME_CHAIN_ID),
+            teleportCount: 0,
+            uniqueChainsVisited: 0,
+            lastTeleportAt: 0,
+            isAlive: true,
+            jackpotEligible: false
+        });
 
-        emit CatMinted(tokenId, msg.sender, clan, currentPrice, priceTimestamp);
+        _accrueJackpot(JACKPOT_FEE_PER_MINT, JACKPOT_SOURCE_MINT);
+
+        emit CatMinted(
+            tokenId,
+            msg.sender,
+            clan,
+            priceData.price,
+            priceData.updatedAt
+        );
         return tokenId;
     }
 
     // Oracle Imprint 생성 내부 함수
     function _generateOracleImprint(
-        uint8 clan
+        uint8 clan,
+        bytes32 assetId,
+        PriceFeedGuard.PriceData memory priceData
     ) private view returns (OracleImprint memory) {
-        bytes32 assetId = getAssetIdFromClan(clan);
-        address feedAddress = assetRegistry.getAssetFeed(assetId);
-
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(feedAddress);
-
-        // Chainlink 가격 데이터 가져오기
-        (, int256 price, , uint256 updatedAt, ) = priceFeed.latestRoundData();
-
-        // 가격 데이터 검증
-        require(price > 0, "Invalid price data");
-        require(updatedAt > 0, "Invalid timestamp");
-
-        // 가격이 너무 오래되지 않았는지 확인 (24시간 이내)
-        require(block.timestamp - updatedAt <= 24 hours, "Stale price data");
-
-        // 가격 범위 검증 (안전 범위: 매우 넓은 범위로 설정하여 테스트 환경 호환)
-        require(
-            price >= 0 && price <= type(int256).max,
-            "Price out of reasonable range"
-        );
-
         // 에폭 및 엔트로피 계산
         uint64 epochId = uint64(block.timestamp / epochWindow);
         uint64 entropy = uint64(
@@ -260,8 +307,9 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
                         block.prevrandao,
                         msg.sender,
                         clan,
-                        price,
-                        updatedAt
+                        priceData.price,
+                        priceData.roundId,
+                        priceData.updatedAt
                     )
                 )
             )
@@ -269,10 +317,12 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
 
         // 가격 기반 트렌드 계산 (더 현실적인 로직)
         // 가격 데이터를 활용하여 birthTrendBps 계산
-        int32 trendBps = _calculatePriceTrend(price, entropy);
+        int32 trendBps = _calculatePriceTrend(priceData.price, entropy);
 
-        // 변동성 버킷 계산 (가격 하위 32비트 기반)
-        uint32 volBucket = uint32(uint256(price) % 3); // 0=Low, 1=Mid, 2=High
+        // 변동성 버킷 계산 (AssetRegistry 구성을 그대로 사용)
+        uint32 volBucket = uint32(
+            assetRegistry.getAssetVolatilityTier(assetId)
+        );
 
         // 성격 특성들 계산 (엔트로피 기반)
         uint8 temperament = uint8(entropy % 3);
@@ -338,9 +388,23 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
             revert MissionCooldown(remainingCooldown);
         }
 
-        // 파워 증가 계산 (간단한 로직)
-        powerGained = _calculatePowerGain(cat.imprint, missionType);
-        cat.game.power += powerGained;
+        bytes32 assetId = getAssetIdFromClan(cat.imprint.clan);
+        PriceFeedGuard.PriceData memory priceData = _getPriceData(assetId);
+        uint8 volatilityTier = assetRegistry.getAssetVolatilityTier(assetId);
+
+        powerGained = _calculatePowerGain(
+            cat.imprint,
+            priceData,
+            missionType,
+            volatilityTier
+        );
+
+        uint256 updatedPower = uint256(cat.game.power) + powerGained;
+        if (updatedPower > type(uint32).max) {
+            cat.game.power = type(uint32).max;
+        } else {
+            cat.game.power = uint32(updatedPower);
+        }
         newPower = cat.game.power;
 
         // 쿨다운 업데이트
@@ -351,28 +415,39 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
         else revert InvalidMissionType();
 
         emit MissionCompleted(tokenId, missionType, powerGained);
+        _accrueJackpot(JACKPOT_FEE_PER_MISSION, JACKPOT_SOURCE_MISSION);
         return (powerGained, newPower);
     }
 
     // 파워 증가 계산 내부 함수
     function _calculatePowerGain(
         OracleImprint memory imprint,
-        uint8 missionType
+        PriceFeedGuard.PriceData memory priceData,
+        uint8 missionType,
+        uint8 volatilityTier
     ) private view returns (uint32) {
-        // 기본 파워 증가 (1, 3, 5 중 하나)
-        uint32 basePower = uint32(
-            uint256(
-                keccak256(
-                    abi.encodePacked(
-                        block.timestamp,
-                        imprint.entropy,
-                        missionType
-                    )
+        uint256 seed = uint256(
+            keccak256(
+                abi.encodePacked(
+                    block.timestamp,
+                    block.prevrandao,
+                    priceData.roundId,
+                    priceData.price,
+                    imprint.entropy,
+                    missionType
                 )
-            ) % 3
-        ) *
-            2 +
-            1;
+            )
+        );
+
+        // 기본 파워 증가 (1, 3, 5 중 하나)
+        uint32 basePower = (uint32(seed % 3) * 2) + 1;
+
+        // 미션 타입별 가중치
+        if (missionType == 1) {
+            basePower += 1; // Weekly 보상
+        } else if (missionType == 2) {
+            basePower += 2; // Monthly 보상
+        }
 
         // temperament에 따른 보정
         if (imprint.temperament == 0) {
@@ -384,7 +459,96 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
             basePower = (basePower * 120) / 100; // 20% 증가
         }
 
+        // fortune tier 보정
+        if (imprint.fortuneTier == 2) {
+            basePower += 1;
+        } else if (imprint.fortuneTier == 0 && basePower > 1) {
+            basePower -= 1;
+        }
+
+        // 현재 가격 트렌드와 탄생 트렌드 비교
+        int32 currentTrend = _calculatePriceTrend(
+            priceData.price,
+            uint64(seed)
+        );
+        if (currentTrend > imprint.birthTrendBps) {
+            basePower += 1;
+        } else if (currentTrend < imprint.birthTrendBps && basePower > 1) {
+            basePower -= 1;
+        }
+
+        // 변동성 티어 보정
+        if (volatilityTier >= 2) {
+            basePower += 1;
+        } else if (volatilityTier == 0 && basePower > 1) {
+            basePower -= 1;
+        }
+
         return basePower;
+    }
+
+    function teleportToChain(
+        uint256 tokenId,
+        uint32 destinationChainId,
+        bytes calldata ccipPayload
+    ) external nonReentrant returns (TeleportState memory) {
+        if (ownerOf(tokenId) != msg.sender) revert NotTokenOwner();
+        TeleportState storage teleport = _ensureTeleportState(tokenId);
+        if (!teleport.isAlive) revert CatInactive();
+        if (!_isSupportedDestination(destinationChainId)) {
+            revert TeleportDestinationNotAllowed(destinationChainId);
+        }
+        if (destinationChainId == teleport.currentChainId) {
+            revert TeleportDestinationNotAllowed(destinationChainId);
+        }
+
+        uint256 cooldownRemaining = _getRemainingTeleportCooldown(teleport);
+        if (cooldownRemaining > 0) {
+            revert TeleportCooldown(cooldownRemaining);
+        }
+
+        Cat storage cat = cats[tokenId];
+        if (cat.game.power < TELEPORT_POWER_COST) {
+            revert TeleportPowerTooLow(cat.game.power, TELEPORT_POWER_COST);
+        }
+
+        cat.game.power -= TELEPORT_POWER_COST;
+
+        uint32 previousChain = teleport.currentChainId;
+        teleport.currentChainId = destinationChainId;
+        teleport.lastTeleportAt = uint64(block.timestamp);
+        teleport.teleportCount += 1;
+
+        uint32 mask = _chainMask(destinationChainId);
+        if ((teleport.visitedChainsBitmap & mask) == 0) {
+            teleport.visitedChainsBitmap |= mask;
+            teleport.uniqueChainsVisited += 1;
+        }
+
+        bytes32 payloadHash = keccak256(ccipPayload);
+
+        emit TeleportCompleted(
+            tokenId,
+            previousChain,
+            destinationChainId,
+            teleport.teleportCount,
+            teleport.visitedChainsBitmap,
+            payloadHash
+        );
+
+        _accrueJackpot(JACKPOT_FEE_PER_TELEPORT, JACKPOT_SOURCE_TELEPORT);
+
+        if (
+            !teleport.jackpotEligible &&
+            teleport.uniqueChainsVisited >= GRAND_TOUR_TARGET
+        ) {
+            teleport.jackpotEligible = true;
+            if (!jackpotClaimed && jackpotPool > 0) {
+                _awardJackpot(tokenId, msg.sender);
+            }
+        }
+
+        return teleport;
     }
 
     // 보상 청구 함수
@@ -401,6 +565,19 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
         fishToken.mintTo(msg.sender, REWARD_AMOUNT);
 
         emit RewardClaimed(tokenId, msg.sender, REWARD_AMOUNT);
+    }
+
+    function _getRemainingTeleportCooldown(
+        TeleportState memory teleport
+    ) private view returns (uint256) {
+        if (teleport.lastTeleportAt == 0) {
+            return 0;
+        }
+        uint256 elapsed = block.timestamp - teleport.lastTeleportAt;
+        if (elapsed >= TELEPORT_COOLDOWN) {
+            return 0;
+        }
+        return TELEPORT_COOLDOWN - elapsed;
     }
 
     // 쿨다운 계산 내부 함수
@@ -438,11 +615,51 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
     )
         external
         view
-        returns (uint256 _tokenId, uint8 clan, uint32 power, bool rewarded)
+        returns (
+            uint256 tokenId_,
+            OracleImprint memory imprint,
+            CatGameState memory game,
+            TeleportState memory teleport,
+            address ownerAddress
+        )
     {
         require(_ownerOf(tokenId) != address(0), "Token does not exist");
         Cat storage cat = cats[tokenId];
-        return (tokenId, cat.imprint.clan, cat.game.power, cat.game.rewarded);
+        OracleImprint memory imprintData = cat.imprint;
+        CatGameState memory gameData = cat.game;
+        address catOwner = ownerOf(tokenId);
+        TeleportState memory teleportData = teleportStates[tokenId];
+        if (teleportData.visitedChainsBitmap == 0) {
+            teleportData = TeleportState({
+                currentChainId: HOME_CHAIN_ID,
+                visitedChainsBitmap: _chainMask(HOME_CHAIN_ID),
+                teleportCount: 0,
+                uniqueChainsVisited: 0,
+                lastTeleportAt: 0,
+                isAlive: true,
+                jackpotEligible: false
+            });
+        }
+        return (tokenId, imprintData, gameData, teleportData, catOwner);
+    }
+
+    function getTeleportState(
+        uint256 tokenId
+    ) external view returns (TeleportState memory) {
+        require(_ownerOf(tokenId) != address(0), "Token does not exist");
+        TeleportState memory teleport = teleportStates[tokenId];
+        if (teleport.visitedChainsBitmap == 0) {
+            teleport = TeleportState({
+                currentChainId: HOME_CHAIN_ID,
+                visitedChainsBitmap: _chainMask(HOME_CHAIN_ID),
+                teleportCount: 0,
+                uniqueChainsVisited: 0,
+                lastTeleportAt: 0,
+                isAlive: true,
+                jackpotEligible: false
+            });
+        }
+        return teleport;
     }
 
     function getOracleImprint(
@@ -494,5 +711,99 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
 
     function rewardAmount() external pure returns (uint256) {
         return REWARD_AMOUNT;
+    }
+
+    function teleportConfig()
+        external
+        pure
+        returns (uint32 cooldownSeconds, uint8 targetChains, uint32 powerCost)
+    {
+        return (TELEPORT_COOLDOWN, GRAND_TOUR_TARGET, TELEPORT_POWER_COST);
+    }
+
+    function jackpotConfig()
+        external
+        pure
+        returns (uint256 mintFee, uint256 missionFee, uint256 teleportFee)
+    {
+        return (
+            JACKPOT_FEE_PER_MINT,
+            JACKPOT_FEE_PER_MISSION,
+            JACKPOT_FEE_PER_TELEPORT
+        );
+    }
+
+    function jackpotBalance() external view returns (uint256) {
+        return jackpotPool;
+    }
+
+    function getJackpotState()
+        external
+        view
+        returns (
+            uint256 balance,
+            bool claimed,
+            address winner,
+            uint8 targetChains
+        )
+    {
+        return (jackpotPool, jackpotClaimed, jackpotWinner, GRAND_TOUR_TARGET);
+    }
+
+    function getTeleportCooldown(
+        uint256 tokenId
+    ) external view returns (uint256) {
+        require(_ownerOf(tokenId) != address(0), "Token does not exist");
+        TeleportState memory teleport = teleportStates[tokenId];
+        return _getRemainingTeleportCooldown(teleport);
+    }
+
+    function _ensureTeleportState(
+        uint256 tokenId
+    ) private returns (TeleportState storage) {
+        TeleportState storage teleport = teleportStates[tokenId];
+        if (teleport.visitedChainsBitmap == 0) {
+            teleport.currentChainId = HOME_CHAIN_ID;
+            teleport.visitedChainsBitmap = _chainMask(HOME_CHAIN_ID);
+            teleport.uniqueChainsVisited = 0;
+            teleport.isAlive = true;
+        }
+        return teleport;
+    }
+
+    function _accrueJackpot(uint256 amount, bytes32 source) private {
+        if (jackpotClaimed || amount == 0) {
+            return;
+        }
+        fishToken.mintTo(address(this), amount);
+        jackpotPool += amount;
+        emit JackpotAccrued(source, amount, jackpotPool);
+    }
+
+    function _awardJackpot(uint256 tokenId, address winner) private {
+        uint256 payout = jackpotPool;
+        jackpotPool = 0;
+        jackpotClaimed = true;
+        jackpotWinner = winner;
+        bool success = fishToken.transfer(winner, payout);
+        if (!success) revert JackpotPayoutFailed();
+        emit JackpotAwarded(tokenId, winner, payout);
+    }
+
+    function _chainMask(uint32 chainId) private pure returns (uint32) {
+        return uint32(1) << chainId;
+    }
+
+    function _isSupportedDestination(
+        uint32 chainId
+    ) private pure returns (bool) {
+        return chainId > HOME_CHAIN_ID && chainId <= MAX_CHAIN_ID;
+    }
+
+    function _getPriceData(
+        bytes32 assetId
+    ) private view returns (PriceFeedGuard.PriceData memory) {
+        address feedAddress = assetRegistry.getAssetFeed(assetId);
+        return PriceFeedGuard.getValidatedPrice(feedAddress);
     }
 }

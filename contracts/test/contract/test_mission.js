@@ -2,7 +2,7 @@ const { expect } = require("chai");
 const { loadFixture, time } = require("@nomicfoundation/hardhat-network-helpers");
 const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 
-const { deployCatsFixture, mintCat } = require("./helpers");
+const { deployCatsFixture, mintCat, BTC_PRICE } = require("./helpers");
 
 const DAILY = 12 * 60 * 60;
 const WEEKLY = 7 * 24 * 60 * 60;
@@ -22,8 +22,8 @@ describe("VolatilityCats - runMission", () => {
       .to.emit(cats, "MissionCompleted")
       .withArgs(tokenId, 0, anyValue);
 
-    const cat = await cats.getCat(tokenId);
-    expect(cat[2]).to.be.greaterThan(0); // power is at index 2
+    const [, , gameState] = await cats.getCat(tokenId);
+    expect(gameState.power).to.be.greaterThan(0); // power 증가 확인
   });
 
   it("소유자가 아니면 미션을 실행할 수 없다", async () => {
@@ -62,7 +62,7 @@ describe("VolatilityCats - runMission", () => {
   });
 
   it("Weekly 미션 쿨다운이 제대로 적용된다", async () => {
-    const { cats, player } = await loadFixture(setup);
+    const { cats, player, btcFeed } = await loadFixture(setup);
     const tokenId = await mintCat(cats, player);
 
     // Weekly 미션 실행
@@ -76,11 +76,12 @@ describe("VolatilityCats - runMission", () => {
 
     // 시간 경과 후 재실행 - 성공
     await time.increase(WEEKLY + 1);
+    await btcFeed.updateAnswer(BTC_PRICE);
     await expect(cats.connect(player).runMission(tokenId, 1)).to.not.be.reverted;
   });
 
   it("Monthly 미션 쿨다운이 제대로 적용된다", async () => {
-    const { cats, player } = await loadFixture(setup);
+    const { cats, player, btcFeed } = await loadFixture(setup);
     const tokenId = await mintCat(cats, player);
 
     // Monthly 미션 실행
@@ -94,6 +95,7 @@ describe("VolatilityCats - runMission", () => {
 
     // 시간 경과 후 재실행 - 성공
     await time.increase(MONTHLY + 1);
+    await btcFeed.updateAnswer(BTC_PRICE);
     await expect(cats.connect(player).runMission(tokenId, 2)).to.not.be.reverted;
   });
 });
