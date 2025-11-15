@@ -17,6 +17,12 @@ Chainlink CCIP 기반 메시지 처리와 Data Feed/Stream 가격 검증을 Vola
 -   **Constraints**: 테스트넷 LINK 수급, CCIP Router 지원 체인, 시간 제한(해커톤)
 -   **Scale**: 초기 6~8 자산, 향후 확장 가능하도록 매개변수화
 
+### Env Strategy (local vs dev/testnet)
+
+-   로컬 Hardhat 네트워크: `MockV3Aggregator`를 사용해 BTC/ETH/SOL/DOGE/PEPE/LINK 가격을 모의하고, 프론트엔드는 로컬 ABI + 로컬 컨트랙트 주소만 알면 된다.
+-   dev/testnet(예: Monad Testnet, Amoy 등): `contracts/testnet-datastream.json` 또는 `network-config.ts`에 정의된 실제 Chainlink v3 Aggregator 주소를 사용하고, 배포 스크립트에서 자동으로 `setClanFeed`/`AssetRegistry`를 초기화한다.
+-   두 환경 모두 동일 ABI를 공유하고, 프론트엔드는 네트워크별 컨피그(JSON)만 교체하는 방식으로 테스트/배포를 전환한다.
+
 ## Constitution Check
 
 -   **Simplicity**: 메시지 스키마·자산 레지스트리로 최소 단위 분리, 과도한 추상화 금지
@@ -39,6 +45,7 @@ contracts/
   │   ├─ registry/AssetRegistry.sol
   │   └─ libraries/PriceFeedGuard.sol
   └─ scripts/network-config.ts
+  └─ testnet-datastream.json      # Monad Testnet용 feed 주소 소스 (BTC/ETH/SOL/DOGE/PEPE/LINK)
 tests/
   ├─ contract/ccip/
   └─ integration/asset-registry/

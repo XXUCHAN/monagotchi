@@ -7,6 +7,11 @@
 -   Chainlink CCIP Router 주소, chain selector, feed 주소 JSON
 -   테스트넷 전용 배포 키 (`.env`에 저장, git 미추적)
 
+### Env Matrix (local vs dev/testnet)
+
+-   **local (Hardhat)**: MockV3Aggregator 기반 가격 피드, CCIP Router/fee 없이도 테스트 가능. 프론트엔드는 로컬 VolatilityCats 주소와 ABI만 알면 된다.
+-   **dev/testnet (Monad Testnet 등)**: `contracts/testnet-datastream.json`/`network-config.ts`에서 BTC/ETH/SOL/DOGE/PEPE/LINK feed 주소를 로드하여 실제 Chainlink v3 Aggregator 사용, CCIP Router/LINK 설정 필요.
+
 ## Scenarios (PASS/FAIL)
 
 1. **PASS**: `pnpm hardhat test test/ccip/` → CCIP 메시지 스키마 및 AssetRegistry 단위테스트 성공  

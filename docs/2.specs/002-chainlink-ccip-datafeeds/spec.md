@@ -16,6 +16,7 @@
 3. Given Data Feed 응답이 stale(예: 마지막 업데이트가 3분 이상) 하거나 deviation 한도를 초과했을 때, When CCIP 페이로드가 가격 참조를 요구하면, Then 컨트랙트는 트랜잭션을 revert 하고 이벤트로 비정상 상태를 기록한다.
 4. Given 테스트넷 배포 프로세스가 실행될 때, When Hardhat 스크립트가 네트워크 설정/키/CCIP Router 주소를 로드하면, Then 모든 컨트랙트 주소·체인·커밋이 `docs/3.release/`에 기록된다.
 5. Given CCIP 실행 수수료 부족 혹은 LINK 잔액이 모자랄 때, When 메시지 전송을 시도하면, Then 시스템은 사전에 fee check를 수행하고 실패 시 사용자에게 원인을 노출한다. `[NEEDS CLARIFICATION: fee 한도 및 자동 충전 정책]`
+6. Given 프론트엔드 개발자가 로컬 Hardhat 네트워크에서 Volatility Cats를 호출할 때, When 컨트랙트가 가격을 조회하면, Then MockV3Aggregator(로컬 모의 피드)를 사용하고, 동일 코드가 dev/testnet 환경으로 배포되면 `testnet-datastream.json`/config에 정의된 실제 Chainlink v3 Aggregator 주소를 사용한다.
 
 ### Edge Cases
 
@@ -35,6 +36,7 @@
 -   **FR-004**: `AssetRegistry` 혹은 동등한 저장소를 통해 자산별 feed 주소, volatilityMultiplier, exposureLimit 등을 온체인에 보관하고, 새 자산은 관리자 함수를 통해 추가할 수 있어야 한다.
 -   **FR-005**: 테스트넷/메인넷 배포 시 Router 주소, chain selector, LINK 수수료 토큰 주소 등 환경설정이 한 곳(`network-config.ts` 등)에 모여 있어야 한다.
 -   **FR-006**: 배포 후 Release 문서에 체인, 주소, 커밋 SHA, 테스트 결과를 기록해야 한다.
+‑   **FR-007**: 로컬 개발 환경(local Hardhat)에서는 MockV3Aggregator 기반 피드를 사용하고, dev/testnet 환경에서는 `contracts/testnet-datastream.json` 또는 동등한 config로부터 실제 v3 Aggregator 주소를 로드해 사용해야 하며, 두 환경 모두 동일 ABI를 공유해야 한다.
 
 ### Non-Functional Requirements
 

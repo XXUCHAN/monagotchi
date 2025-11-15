@@ -10,12 +10,14 @@
 - [ ] T030 PriceFeedGuard 단위테스트 (stale/deviation 시나리오)
 - [ ] T040 CCIP mock 통합테스트 (Router → Adapter → VolatilityCats 훅)
 - [ ] T050 다중 자산 민팅/미션 플로우 시나리오 테스트 (BTC, ETH, SOL, DOGE, PEPE, LINK)
+- [ ] T055 로컬(MockV3Aggregator) vs dev/testnet(실제 Aggregator) 환경별 feed 설정/조회 시나리오 테스트 및 프론트엔드 컨피그(JSON) 검증
 
 ## Phase 3.3: Core Implementation
 - [ ] T060 ChainlinkCCIPAdapter 구현 및 `VolatilityCats` 연동 훅 추가
 - [ ] T070 AssetRegistry/관리자 함수 및 config 라이브러리 구현
 - [ ] T080 PriceFeedGuard/Feed 조회 모듈 구현
 - [ ] T090 Hardhat 스크립트 업데이트 (배포/검증, config 공유)
+‑ [ ] T095 환경별 feed 초기화 로직 구현 (local: MockV3Aggregator 배포 및 주입, dev/testnet: `testnet-datastream.json` 기반 실제 feed 주소 세팅)
 
 ## Phase 3.4: Integration
 - [ ] T100 테스트넷 배포 Dry-run (퍼블릭 RPC, 테스트 키 사용)
@@ -25,6 +27,7 @@
 ## Phase 3.5: Polish
 - [ ] T130 문서 정리: quickstart, data model, README 배포 섹션 반영
 - [ ] T140 피드 주소/자산 파라미터 변경 절차 가이드 작성
+‑ [ ] T150 프론트엔드용 네트워크 컨피그(JSON) 및 사용 가이드 작성 (local=mock, dev/testnet=실제 feed)
 
 ## Dependencies
 - CCIP 테스트넷 지원 여부 확인 후 진행 (T001 → T040)

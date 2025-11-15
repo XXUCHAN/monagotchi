@@ -13,26 +13,23 @@ This guide supports two development modes:
 **Rapid Development Mode (Current)**
 
 -   Single branch (`main`) for fast iteration
--   Single server deployment
--   Direct commits to main
 -   Skip PR/review process
 -   Suitable for: MVP development, prototyping, early-stage projects
 
 **Production-Ready Mode (Future)**
 
 -   Multi-branch workflow (dev/test/prod)
--   Multiple environment deployments
 -   PR review and approval process
 -   Staged rollout procedures
 -   Suitable for: Production applications, team collaboration, regulated environments
 
-**Note**: Tasks related to PR creation, branch promotion, and multi-environment deployment are optional and should be skipped during Rapid Development Mode.
+**Note**: Tasks related to PR creation or branch promotion are optional and should be skipped during Rapid Development Mode.
 
 ## 1. Ground Rules (Non-Negotiable)
 
 -   Test-First: Write tests before implementation (Red → Green → Refactor).
 -   No Secrets: Never read/print real credentials or PII. Use placeholders.
--   No Destructive Ops: Avoid DROP/TRUNCATE/DELETE/ALTER; no `git push --force`, `reset --hard`.
+-   No Destructive Ops: Avoid DROP/TRUNCATE/DELETE/ALTER; never rewrite shared history.
 -   Small, Reversible Changes: Prefer small edits and clear diffs.
 -   Contract-First: Define/validate APIs and schemas before code.
 -   Single Work Item Focus: Complete one feature slice end-to-end before starting another.
@@ -353,24 +350,6 @@ MANDATORY task granularity policy:
 -   Service: 1 task per business capability.
 -   UI: 1 task per component/page; state or accessibility as separate tasks if nontrivial.
 
-Deployment tasks (Optional - for production-ready projects)
-
--   For rapid development with single branch (main) and single server:
-    -   Skip PR creation and branch promotion tasks
-    -   Deploy directly to main server after feature completion
-    -   Document deployment in release notes
-
-Template addition example — deployment phase (optional):
-
-```markdown
-## Phase 3.6: Deployment (Optional)
-
--   [ ] T090 Deploy to main server and verify
--   [ ] T100 Update release notes with deployment info
-```
-
-Note: Deployment pipeline and multi-environment setup should be configured before production launch.
-
 Definition of Done (per task):
 
 -   A passing test exists and covers the task scope.
@@ -402,11 +381,6 @@ Tasks authoring template:
 
 -   [ ] T040 Unit tests for validators
 
-## Phase 3.6: Deployment (Optional)
-
--   [ ] T090 Deploy to main server and verify (skip for rapid development)
--   [ ] T100 Update release notes with deployment info
-
 ## Dependencies
 
 ## Parallel Examples
@@ -418,22 +392,20 @@ Tasks authoring template:
 
 -   Implement minimal code to make tests pass; keep diffs small.
 -   Update docs as sources-of-truth when behavior changes.
--   On completion, write release notes `docs/3.release/RELEASE-YYYY-MM-DD.md` with:
-    -   Features, Breaking Changes, Migrations, Tests Added, Known Issues.
 
 ### 3.9 Report Management
 
--   When a task or feature is completed, AI agents may generate reports (e.g., test reports, deployment reports, analysis reports).
+-   When a task or feature is completed, AI agents may generate reports (예: 테스트 리포트, 분석 리포트).
 -   All such reports must be saved in the `docs/reports/` directory.
 -   **Report Language (MANDATORY)**: All reports must be written in Korean (한국어).
     -   Exception: Code snippets, command outputs, and technical logs may remain in English for accuracy.
-    -   Technical terms may use English in parentheses for clarity (e.g., "배포 (deployment)").
--   Report naming convention: Always prefix with timestamp in `YYMMDDTT` format followed by descriptive name (e.g., `25110203-VPN-SERVER-TEST-REPORT.md`, `25110201-DEPLOYMENT-TEST-REPORT.md`).
+    -   Technical terms may use English in parentheses for clarity.
+-   Report naming convention: Always prefix with timestamp in `YYMMDDTT` format followed by descriptive name (e.g., `25110203-VPN-SERVER-TEST-REPORT.md`).
     -   `YY`: 2-digit year
     -   `MM`: 2-digit month
     -   `DD`: 2-digit day
     -   `TT`: 2-digit time (00-23 for hour, or sequential number if multiple reports in same day)
--   Keep reports organized by type or feature if the volume grows (e.g., `docs/reports/deployment/`, `docs/reports/testing/`).
+-   Keep reports organized by type or feature if the volume grows (e.g., `docs/reports/testing/`).
 
 ## 4. Scope Rules
 
@@ -459,7 +431,7 @@ Update Flow Examples
     -   Feature: Custom VPC for a service → `[###-feature-slug]/plan.md`
 -   CI/CD
     -   Shared: Standard pipeline template → `_shared/ci-cd/pipelines.md`
-    -   Feature: Feature deployment config → `[###-feature-slug]/plan.md`
+    -   Feature: Feature runtime config → `[###-feature-slug]/plan.md`
 -   Schemas
     -   Shared: Common error response format → `_shared/schemas/errors.json`
     -   Feature: Feature API contract → `[###-feature-slug]/contracts/api.yaml`
@@ -515,33 +487,27 @@ PR/Release Process
 -   Never include secrets, tokens, or real endpoints in docs.
 -   Respect license terms for libraries/APIs; record in research.md if relevant.
 -   Log PII-safe only; default to redaction.
--   After git push, verify .gitignore settings using GitHub CLI: `gh pr view --json files` or `git ls-files` to ensure sensitive files are properly excluded.
+    \*\*\* End Patch
 
-## 7. Commit / PR Conventions
-
--   Commit format: `feat(specs): [NNN-slug] add spec.md` / `chore(shared): update schemas`
--   PR template includes: Summary, Tests, Impact, Rollback Plan, Screenshots (if UI)
--   Keep PRs small; group by feature slice.
-
-## 8. Agent Behavior in Cursor
+## 7. Agent Behavior in Cursor
 
 -   Always show minimal diffs and reference changed paths.
 -   Prefer running read-only actions before edits; confirm gates.
 -   Use non-interactive commands with safe flags; avoid long-running foreground jobs.
 -   When blocked, produce options (A/B/C) with trade-offs and ask for a choice.
 
-## 9. Glossary
+## 8. Glossary
 
 -   Feature Slug: `NNN-kebab-case` (sequential; 3 digits)
 -   Contracts: OpenAPI/JSON schemas defining IO
 -   Gates: Required checks to proceed to next phase
 
-## 10. Templates (Pointers)
+## 9. Templates (Pointers)
 
 -   Do not depend on external template directories. The authoritative templates are embedded above in this file.
 -   Adapt wording to project domain but keep the section names and gates intact.
 
-## 11. Language and Communication Guidelines
+## 10. Language and Communication Guidelines
 
 ### 11.1 Response Language
 
@@ -609,56 +575,41 @@ Use this mode when inheriting an existing/abandoned codebase with partially impl
 -   Plan staged rollout (internal → canary → cohort → 100%).
 -   Document flag ownership, expiration/sunset plan.
 
-### 12.6 Branching & Release Discipline
-
--   **Single Branch Development (Rapid Development Mode)**:
-    -   Use `main` branch only for fast iteration
-    -   Commit directly to main with clear commit messages
-    -   Tag releases for version tracking
-    -   Skip PR process during rapid development phase
--   **Multi-Branch Development (Production-Ready Mode)**:
-    -   Use feature branches for isolation
-    -   Hotfix branches allowed for critical regressions
-    -   PR review required before merge
-    -   Keep PRs small and focused
--   **Versioning**: semantic; bump per change type; tag releases.
--   **Release notes** required in `docs/3.release/RELEASE-YYYY-MM-DD.md` (features, fixes, known issues).
-
-### 12.7 Task Granularity (Brownfield-Specific)
+### 12.6 Task Granularity (Brownfield-Specific)
 
 -   Bugs: Reproduce → Write failing test → Fix minimal surface → Add regression.
 -   Endpoints: At least one task per endpoint per concern (contract, impl, error handling).
 -   Avoid “mega” tasks; prefer smallest verifiable slices with clear DoD.
 
-### 12.8 Documentation Sync
+### 12.7 Documentation Sync
 
 -   If code is ahead of docs, create a “delta spec” in the feature folder summarizing observed behavior vs intended.
 -   Decide promotion to `_shared/` for reusable pieces; otherwise keep feature-scoped and reference.
 
-### 12.9 CI/CD Progressive Gating
+### 12.8 CI/CD Progressive Gating
 
 -   Level 0 (observe): Lint/test run, no block; publish reports.
 -   Level 1 (warn): Block on critical issues only (failing tests, broken schemas).
 -   Level 2 (enforce): Full gates (lint, tests, coverage min, schema/contract validation, secret scan).
 -   Increase level per module/service as stability improves.
 
-### 12.10 Observability & Quality Baseline
+### 12.9 Observability & Quality Baseline
 
 -   Structured logging (JSON) with correlation IDs; error taxonomy; minimal request metrics.
 -   Define initial SLOs and error budgets; track in CI dashboards.
 
-### 12.11 Security & Compliance
+### 12.10 Security & Compliance
 
 -   Enable SAST/Dependency/Secret scans; produce SBOM.
 -   Record licenses and constraints in `research.md` if relevant.
 
-### 12.12 Environment Map
+### 12.11 Environment Map
 
 -   Document environment mapping, endpoints, and access policies (no secrets in repo; use placeholders).
 -   Record feature flags per environment and default values.
 -   For rapid development: single environment (main server) is sufficient.
 
-### 12.13 Brownfield Checklist
+### 12.12 Brownfield Checklist
 
 -   [ ] Endpoint/DB/Dependency inventories created
 -   [ ] Live vs contract drift analyzed; ADR recorded/approved
@@ -669,9 +620,8 @@ Use this mode when inheriting an existing/abandoned codebase with partially impl
 -   [ ] Observability baseline enabled (logging/metrics)
 -   [ ] Security scans enabled; SBOM generated
 -   [ ] Environment map documented; secrets out of repo
--   [ ] Release notes updated for changes
 
-### 12.14 Policy Alignment (Brownfield)
+### 12.13 Policy Alignment (Brownfield)
 
 -   When brownfield projects deviate from this guide's policies, initiate and deliver a dedicated feature to bring the project into compliance.
 -   Include spec/plan/tasks under `docs/2.specs/`, capture ADR for trade-offs, and use staged rollout with a rollback plan.
@@ -691,7 +641,7 @@ Use this mode when inheriting an existing/abandoned codebase with partially impl
 -   Security/Access: login, 2FA, granting roles/permissions, provisioning secrets/tokens
 -   External platforms: third-party integration config, billing/charges, org-level policy changes
 -   Data/Schema: migrations, schema changes, bulk data writes/updates
--   Production impact: deploy/rollback, real user traffic, payments, writes against production data
+-   Production impact: rollback operations, real user traffic, payments, writes against production data
 -   Legal/Compliance: personal data flows, regulated changes, license changes
 -   Product decisions: major UX changes; ambiguous or conflicting requirements
 
@@ -715,7 +665,7 @@ Use this mode when inheriting an existing/abandoned codebase with partially impl
 -   Risks (security/data/cost/reversibility)
 -   Environment and rollback plan
 -   Verification evidence (tests/mocks/dry-run)
--   Operations plan (monitoring/flags/release notes)
+-   Operations plan (monitoring/flags/status updates)
 
 ### 14.6 Minimize questions
 
@@ -782,97 +732,15 @@ Use this mode when inheriting an existing/abandoned codebase with partially impl
 -   Review gate: require split plan when triggers are hit
 -   Release notes: record split rationale and impact
 
-## 16. GitHub Management Policy (gh CLI Standard)
-
--   Primary tool: GitHub CLI (`gh`) for repository and PR operations (when using PR workflow)
--   Authentication: Use `gh auth login` with device flow; never commit tokens
--   Remotes: Prefer HTTPS with `gh` auth; avoid storing credentials in .git/config
-
-### 16.1 Branch & Commit Safety
-
--   **Forbidden**: `git push --force`, rewriting shared history
--   **Single Branch Mode (Rapid Development)**:
-    -   Commit directly to main with descriptive messages
-    -   Use conventional commit format: `feat:`, `fix:`, `chore:`, etc.
-    -   Tag releases for version tracking
--   **Multi-Branch Mode (Production-Ready)**:
-    -   Use feature branches for isolation
-    -   Use squash merges by default; clean history per slice
-    -   Sign commits if required by org policy
-
-### 16.2 CI & Checks
-
--   Run tests locally before pushing to main (single branch mode)
--   Require green checks before merge (multi-branch mode)
--   Re-run with `gh run rerun <id>` if flaky
--   Use labels (e.g., `size/XL`, `needs-splitting`) to reflect feature size status
-
-## 16.B Go Toolchain & Dependency Management Policy
-
--   Default dependency management: Go modules (`go.mod` and `go.sum`). Use `go mod download` for deterministic installs in CI.
--   Go version pinning: specify exact Go version via `go.mod` (e.g., `go 1.21`); CI must use the pinned version.
--   Vendoring: optional; use `go mod vendor` if offline builds or reproducibility is critical.
--   Caching: enable Go module cache keyed by (go version + go.sum hash); cache `$GOPATH/pkg/mod` and build cache `~/.cache/go-build`.
-
-### 16.3 Security & Least Privilege
-
--   Use fine-scoped PATs only when `gh` cannot cover the case; store outside repo
--   Do not echo secrets in logs; redact outputs
-
-## 17. 배포 추적성 관리 (Deployment Traceability)
-
-### 17.1 목적
-
-배포된 코드의 출처를 명확히 추적하여 롤백, 디버깅, QA 검증을 위한 근거를 확보한다.
-
-### 17.2 적용 시점
-
--   **Rapid Development Mode**: 선택 사항 (수동 배포 기록 권장)
--   **Production-Ready Mode**: 필수 (자동화된 CI/CD 파이프라인 구축 시)
-
-### 17.3 요구사항
-
--   모든 배포 시점에 Git 커밋 SHA, 브랜치명, 빌드ID, 타임스탬프를 기록
--   CI/CD 파이프라인에서 자동화된 메타데이터 주입 (Production-Ready Mode)
--   배포 히스토리 문서화
-
-### 17.4 구현 전략
-
-**Rapid Development Mode (수동)**:
-
-1. 배포 후 `docs/3.release/RELEASE-YYYY-MM-DD.md`에 수동으로 기록
-2. 커밋 SHA와 배포 시간 기록
-3. 주요 변경사항 요약
-
-**Production-Ready Mode (자동)**:
-
-1. **환경 변수 주입**: DEPLOY_COMMIT_SHA, DEPLOY_BRANCH_NAME을 빌드 시점에 설정
-2. **메타데이터 저장**: 서버 배포 시 환경 변수로 SHA 저장
-3. **배포 기록**: 배포 완료 후 `docs/3.release/`에 커밋·빌드ID·시간을 자동 기록
-
-### 17.5 검증 항목 (Production-Ready Mode)
-
--   [ ] 배포된 서버에서 현재 커밋 SHA 조회 가능
--   [ ] 롤백 시점의 정확한 커밋 식별 가능
--   [ ] 배포 히스토리 보고서 자동 생성
-
-### 17.6 CI/CD Checklist (Production-Ready Mode)
-
--   Before deploy: capture `DEPLOY_COMMIT_SHA` (commit SHA) and `DEPLOY_BRANCH_NAME` (branch name).
--   Persist metadata: set environment variables `deploy.sha` and `deploy.branch` on server.
--   Deploy: release application to the intended server environment.
--   After deploy: write a release entry under `docs/3.release/` with timestamp, server id, commit, branch, and build identifier.
-
-## 18. 1인 운영자 기본설정 (Solo Operator Defaults)
+## 16. 1인 운영자 기본설정 (Solo Operator Defaults)
 
 This section records project-specific defaults based on the current owner's context: solo operator, basic app/web experience, limited networking/security expertise, and AI-agent–led development. When conflicts arise, this section overrides generic guidance while preserving safety gates.
 
-### 18.1 Development Mode Defaults
+### 16.1 Development Mode Defaults
 
--   Default to Rapid Development Mode at all times (single branch `main`, direct commits, skip PRs) unless explicitly escalated.
--   Always write concise release notes under `docs/3.release/RELEASE-YYYY-MM-DD.md` after meaningful changes.
+-   Default to Rapid Development Mode at all times (single branch `main`, skip PRs) unless explicitly escalated.
 
-### 18.2 Decision Levels & Mandatory Approvals (Conservative by Default)
+### 16.2 Decision Levels & Mandatory Approvals (Conservative by Default)
 
 -   Default risk posture: conservative.
 -   Require explicit owner approval (A2) before any of the following:
@@ -885,52 +753,52 @@ This section records project-specific defaults based on the current owner's cont
     -   1. Short summary, 2) Recommended option, 3) Alternatives (A/B/C) with pros/cons,
     -   4. Risks/cost estimate, 5) Rollback plan, 6) Test strategy & environment rationale.
 
-### 18.3 Environment Choice Policy (Local-First)
+### 16.3 Environment Choice Policy (Local-First)
 
 -   Prefer local, mocks, emulators by default; avoid cloud provisioning without prior approval.
 -   If cloud usage is required, propose an ephemeral/sandbox plan with teardown steps and cost cap.
 -   Record a one-line rationale for chosen environment in status updates.
 
-### 18.4 Testing & Safety Nets
+### 16.4 Testing & Safety Nets
 
 -   Tests-first remains mandatory: contract/integration tests precede implementation for externally observable behaviors.
 -   Security-sensitive or behavior-changing features must be behind feature flags (default OFF) with a clear sunset plan.
 -   Use dry-runs where possible; include verifiable rollback steps. Destructive DB operations remain prohibited.
 
-### 18.5 Communication & Explainability (Owner-Friendly)
+### 16.5 Communication & Explainability (Owner-Friendly)
 
 -   All user-facing explanations and approvals in Korean; keep code/spec in English as needed.
 -   Every risky proposal must include: "짧은 요약", "권장안", "대안", "위험/비용", "테스트/롤백", "다음 행동".
 -   Include a one-paragraph non-expert explanation when networking/security concepts affect a decision.
 
-### 18.6 Cost Guardrails
+### 16.6 Cost Guardrails
 
 -   Default to free-tier or local alternatives; estimate monthly and per-run costs for any cloud plan.
 -   Set an explicit cost cap; do not exceed without approval.
 
-### 18.7 Secrets & Credentials Handling
+### 16.7 Secrets & Credentials Handling
 
 -   Never request real secrets in chat; use placeholders and provide a secure setup guide.
--   Maintain `.env.example` and ignore real `.env` files; do not commit secrets.
+-   Maintain `.env.example` and ignore real `.env` files; never add secrets to the repository.
 
-### 18.8 Task Management & Planning (Sequential-Thinking Alignment)
+### 16.8 Task Management & Planning (Sequential-Thinking Alignment)
 
 -   For new features, outline 4–6 sequential steps with risks, alternatives, dependencies, and test plans before implementation.
--   Proceed autonomously for low-risk, reversible work; pause at the approval gates in 18.2.
+-   Proceed autonomously for low-risk, reversible work; pause at the approval gates in 16.2.
 
-### 18.9 Infra & Data Defaults
+### 16.9 Infra & Data Defaults
 
 -   Prefer local SQLite/Firestore emulators for development; avoid live data paths.
 -   Any schema evolution requires tests, backup/restore notes, and explicit approval.
 
-### 18.10 Status Update Cadence
+### 16.10 Status Update Cadence
 
 -   Provide brief status updates at kickoff, before/after tool batches, and upon completion, focusing on: what changed, why, next action, and risks if any.
 
-### 18.11 Reports
+### 16.11 Reports
 
 -   When generating reports, save them under `docs/reports/` in Korean, following the timestamped naming convention in §3.9.
 
-### 18.12 Precedence
+### 16.12 Precedence
 
 -   If this section conflicts with earlier generic guidance, apply this section first and cite the deviation in the status update.
