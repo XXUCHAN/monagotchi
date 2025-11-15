@@ -1,7 +1,7 @@
 import localAddresses from '../abi/local-addresses.json';
 
 /**
- * Volatility Cats - Game Constants
+ * Monagotchi - Game Constants
  */
 
 const DEFAULT_FEEDS = {

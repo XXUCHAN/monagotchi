@@ -1,4 +1,4 @@
-import { X, TrendingUp, Clock, Trophy, Zap, Heart } from 'lucide-react';
+import { X, Clock, Trophy, Zap } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { useContract } from '../hooks';
@@ -10,7 +10,7 @@ import {
   MISSION_NAMES,
   POWER_THRESHOLD,
 } from '../constants';
-import { formatTimeRemaining, formatTokenAmount } from '../lib';
+import { formatTimeRemaining } from '../lib';
 import type { CatDisplay } from '../types';
 
 // 고양이 이미지 import

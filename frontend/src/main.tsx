@@ -3,11 +3,12 @@ import { createRoot } from 'react-dom/client'
 import { PrivyProvider } from '@privy-io/react-auth'
 import './index.css'
 import App from './App.tsx'
-import { NETWORK } from './utils/constants'
+import { NETWORK, CONTRACTS } from './constants'
 
 // 디버깅: 실제 로드된 네트워크 확인
-console.log('🔍 Environment:', import.meta.env.VITE_TARGET_NETWORK);
+console.log('🔍 Target Network:', import.meta.env.VITE_TARGET_NETWORK || 'testnet (default)');
 console.log('🌐 NETWORK Config:', NETWORK);
+console.log('📝 Contract Addresses:', CONTRACTS);
 
 // 로컬/테스트넷 체인 정의
 const customChain = {
@@ -31,15 +32,23 @@ const customChain = {
 
 console.log('⛓️ Custom Chain:', customChain);
 
+const privyAppId = import.meta.env.VITE_PRIVY_APP_ID;
+
+if (!privyAppId) {
+  console.error('❌ VITE_PRIVY_APP_ID is not set! Please add it to your .env file.');
+}
+
+console.log('🔐 Privy App ID:', privyAppId ? '✅ Set' : '❌ Missing');
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <PrivyProvider
-      appId={import.meta.env.VITE_PRIVY_APP_ID || ''}
+      appId={privyAppId || ''}
       config={{
         loginMethods: ['email', 'google', 'wallet'],
         appearance: {
           theme: 'dark',
-          accentColor: '#676FFF',
+          accentColor: '#fb5a49', // Monagotchi primary color
         },
         defaultChain: customChain,
         supportedChains: [customChain],

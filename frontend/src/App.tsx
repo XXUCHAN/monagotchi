@@ -1,25 +1,27 @@
 import { usePrivy } from '@privy-io/react-auth'
 import { Toaster } from 'react-hot-toast'
 import { useState } from 'react'
-import { LayoutDashboard, Trophy, Target, Dices } from 'lucide-react'
+import { LayoutDashboard, Trophy, Target, Plane, Sparkles } from 'lucide-react'
 import { Header } from './components/Header'
 import { HeroSection } from './components/HeroSection'
 import { FeatureCard } from './components/FeatureCard'
 import { Dashboard } from './components/Dashboard'
 import { Leaderboard } from './components/Leaderboard'
 import { MissionsPanel } from './components/MissionsPanel'
-import { RoulettePanel } from './components/RoulettePanel'
+import { CrossChainTravelPanel } from './components/CrossChainTravelPanel'
+import { JackpotPanel } from './components/JackpotPanel'
 import { NetworkGuard } from './components/NetworkGuard'
 import { toasterConfig } from './config'
 import { FEATURES } from './constants'
 
-type TabType = 'dashboard' | 'leaderboard' | 'missions' | 'roulette'
+type TabType = 'dashboard' | 'leaderboard' | 'missions' | 'travel' | 'jackpot'
 
 const TABS = [
   { id: 'dashboard' as TabType, label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'leaderboard' as TabType, label: 'Leaderboard', icon: Trophy },
+  { id: 'jackpot' as TabType, label: 'Jackpot', icon: Sparkles },
+  { id: 'travel' as TabType, label: 'Travel', icon: Plane },
   { id: 'missions' as TabType, label: 'Missions', icon: Target },
-  { id: 'roulette' as TabType, label: 'Roulette', icon: Dices },
+  { id: 'leaderboard' as TabType, label: 'Leaderboard', icon: Trophy },
 ]
 
 function App() {
@@ -93,9 +95,10 @@ function App() {
             {/* Tab Content */}
             <div>
               {activeTab === 'dashboard' && <Dashboard />}
-              {activeTab === 'leaderboard' && <Leaderboard />}
+              {activeTab === 'jackpot' && <JackpotPanel />}
+              {activeTab === 'travel' && <CrossChainTravelPanel />}
               {activeTab === 'missions' && <MissionsPanel />}
-              {activeTab === 'roulette' && <RoulettePanel />}
+              {activeTab === 'leaderboard' && <Leaderboard />}
             </div>
       </div>
         )}

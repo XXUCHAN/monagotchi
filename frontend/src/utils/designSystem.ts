@@ -1,5 +1,5 @@
 /**
- * Volatility Cats Design System
+ * Monagotchi Design System
  * Modern Glassmorphism Theme
  */
 

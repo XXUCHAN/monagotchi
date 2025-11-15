@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 import { useWallet } from '../hooks'
-import { toast } from 'react-hot-toast'
 
 /**
  * NetworkGuard 컴포넌트

@@ -3,8 +3,6 @@ import {
   CLAN_NAMES,
   CLAN_COLORS,
   CLAN_ICONS,
-  MISSION_TYPE,
-  MISSION_NAMES,
 } from '../constants';
 import { formatTimeRemaining } from '../lib';
 import type { CatDisplay } from '../types';
@@ -25,9 +23,9 @@ interface CatCardProps {
 }
 
 export function CatCard({ cat, onSelect }: CatCardProps) {
-  const clanColor = CLAN_COLORS[cat.clan];
-  const clanName = CLAN_NAMES[cat.clan];
-  const clanIcon = CLAN_ICONS[cat.clan];
+  const clanColor = CLAN_COLORS[cat.clan as keyof typeof CLAN_COLORS];
+  const clanName = CLAN_NAMES[cat.clan as keyof typeof CLAN_NAMES];
+  const clanIcon = CLAN_ICONS[cat.clan as keyof typeof CLAN_ICONS];
 
   // tokenId 기반으로 deterministic하게 이미지 선택
   const catImageIndex = Number(cat.tokenId) % CAT_IMAGES.length;

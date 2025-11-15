@@ -11,6 +11,7 @@ export { CatDetailModal } from './CatDetailModal'
 export { Leaderboard } from './Leaderboard'
 export { FactionStats } from './FactionStats'
 export { MissionsPanel } from './MissionsPanel'
-export { RoulettePanel } from './RoulettePanel'
+export { CrossChainTravelPanel } from './CrossChainTravelPanel'
+export { JackpotPanel } from './JackpotPanel'
 export { NetworkGuard } from './NetworkGuard'
 

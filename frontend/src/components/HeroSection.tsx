@@ -15,15 +15,15 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
       
       {/* Hero Title */}
       <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight">
-        Trade volatility.
+        Cross-Chain NFT.
         <br />
-        <span className="text-gradient">Earn rewards.</span>
+        <span className="text-gradient">Epic Jackpots.</span>
       </h1>
       
       {/* Description */}
       <p className="text-lg text-white/60 max-w-lg leading-relaxed">
-        Choose your side in the eternal battle. Mint cats aligned with Bitcoin or Ethereum, 
-        complete missions, and claim rewards based on market volatility.
+        Mint your Monagotchi, send them on cross-chain adventures via CCIP, 
+        and win massive jackpots! Complete missions, earn CHURR tokens, and compete for glory.
       </p>
 
       {/* CTA Buttons */}

@@ -18,7 +18,7 @@ export function Header({ authenticated, userAddress, onLogin, onLogout }: Header
               <Cat className="text-primary" size={28} strokeWidth={2.5} />
               <div className="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full animate-pulse" />
             </div>
-            <span className="text-xl font-bold tracking-tight">Volatility</span>
+            <span className="text-xl font-bold tracking-tight">Monagotchi</span>
           </div>
           
           {/* Auth Section */}

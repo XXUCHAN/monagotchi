@@ -1,5 +1,5 @@
 import { usePrivy } from '@privy-io/react-auth'
-import { BrowserProvider, JsonRpcProvider } from 'ethers'
+import { BrowserProvider } from 'ethers'
 import { useMemo } from 'react'
 import { NETWORK } from '../constants'
 
@@ -19,16 +19,33 @@ export function useWallet() {
     }
 
     if (!window.ethereum) {
-      throw new Error('No ethereum provider found')
+      throw new Error('No ethereum provider found. Please install MetaMask.')
     }
 
     const provider = new BrowserProvider(window.ethereum)
+    
+    // Ensure we're on the correct network
+    const network = await provider.getNetwork()
+    const currentChainId = Number(network.chainId)
+    
+    if (currentChainId !== NETWORK.chainId) {
+      console.log(`Wrong network (${currentChainId}), switching to ${NETWORK.chainId}...`)
+      await switchNetwork()
+      // Create new provider after network switch
+      const newProvider = new BrowserProvider(window.ethereum)
+      return await newProvider.getSigner()
+    }
+    
     return await provider.getSigner()
   }
 
   // Get provider for read operations
+  // IMPORTANT: Use MetaMask provider to avoid CORS issues
   const getProvider = () => {
-    return new JsonRpcProvider(NETWORK.rpcUrl)
+    if (!window.ethereum) {
+      throw new Error('No ethereum provider found. Please install MetaMask.')
+    }
+    return new BrowserProvider(window.ethereum)
   }
 
   // Request account access (if needed)
