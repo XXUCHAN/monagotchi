@@ -1,10 +1,11 @@
 import { usePrivy } from '@privy-io/react-auth'
-import { TrendingUp, Coins, Award } from 'lucide-react'
 import { Toaster } from 'react-hot-toast'
 import { Header } from './components/Header'
 import { HeroSection } from './components/HeroSection'
 import { FeatureCard } from './components/FeatureCard'
 import { Dashboard } from './components/Dashboard'
+import { toasterConfig } from './config'
+import { FEATURES } from './constants'
 
 function App() {
   const { ready, authenticated, login, logout, user } = usePrivy()
@@ -22,45 +23,9 @@ function App() {
     )
   }
 
-  const handleMintCat = () => {
-    console.log('Mint cat clicked')
-    // TODO: Implement mint cat logic
-  }
-
   return (
     <>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: 'rgba(31, 41, 55, 0.95)',
-            color: '#fff',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '12px',
-            padding: '16px',
-          },
-          success: {
-            iconTheme: {
-              primary: '#10b981',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
-            },
-          },
-          loading: {
-            iconTheme: {
-              primary: '#fb5a49',
-              secondary: '#fff',
-            },
-          },
-        }}
-      />
+      <Toaster position="top-right" toastOptions={toasterConfig} />
       
       <div className="min-h-screen text-white">
         {/* Header - Fixed at Top */}
@@ -80,37 +45,14 @@ function App() {
 
             {/* Right: Feature Grid */}
             <div className="grid gap-4">
-              <FeatureCard 
-                icon={TrendingUp}
-                iconColor="text-btc"
-                iconBgColor="bg-btc/10 border border-btc/20"
-                title="Bitcoin Alignment"
-                description="Bet on orange coin supremacy. Higher volatility means higher rewards."
-                number="01"
-              />
-              
-              <FeatureCard 
-                icon={Coins}
-                iconColor="text-eth"
-                iconBgColor="bg-eth/10 border border-eth/20"
-                title="Ethereum Alignment"
-                description="Join the blue side. Stability and smart contracts lead to consistent gains."
-                number="02"
-              />
-              
-              <FeatureCard 
-                icon={Award}
-                iconColor="text-secondary"
-                iconBgColor="bg-secondary/10 border border-secondary/20"
-                title="Daily Missions"
-                description="Complete challenges to earn $CHURR tokens and unlock special rewards."
-                number="03"
-              />
+              {FEATURES.map((feature, index) => (
+                <FeatureCard key={index} {...feature} />
+              ))}
             </div>
           </div>
         ) : (
           <div className="min-h-[calc(100vh-8rem)]">
-            <Dashboard onMintCat={handleMintCat} />
+            <Dashboard />
           </div>
         )}
       </main>
