@@ -14,9 +14,6 @@ createRoot(document.getElementById('root')!).render(
           theme: 'dark',
           accentColor: '#676FFF',
         },
-        embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
-        },
       }}
     >
       <App />
