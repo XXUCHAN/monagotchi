@@ -1,0 +1,37 @@
+{
+    "name": "monad_3",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "directories": {
+        "doc": "docs"
+    },
+    "scripts": {
+        "test": "hardhat test",
+        "deploy": "hardhat run scripts/deploy.js --network monadTestnet",
+        "deploy:local": "hardhat run scripts/deploy.js --network localhost"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/monadCat/monad_3.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/monadCat/monad_3/issues"
+    },
+    "homepage": "https://github.com/monadCat/monad_3#readme",
+    "devDependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+        "hardhat": "^2.27.0"
+    },
+    "dependencies": {
+        "@chainlink/contracts": "^1.5.0",
+        "@openzeppelin/contracts": "^5.4.0",
+        "dotenv": "^17.2.3"
+    },
+    "engines": {
+        "node": ">=24.0.0"
+    }
+}
