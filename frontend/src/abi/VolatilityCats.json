@@ -28,11 +28,6 @@
       "type": "error"
     },
     {
-      "inputs": [],
-      "name": "CatInactive",
-      "type": "error"
-    },
-    {
       "inputs": [
         {
           "internalType": "address",
@@ -148,39 +143,12 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "feedAddress",
-          "type": "address"
-        }
-      ],
-      "name": "InvalidPriceFeed",
-      "type": "error"
-    },
-    {
-      "inputs": [],
-      "name": "JackpotPayoutFailed",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "uint256",
           "name": "remainingSeconds",
           "type": "uint256"
         }
       ],
       "name": "MissionCooldown",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "int256",
-          "name": "price",
-          "type": "int256"
-        }
-      ],
-      "name": "NegativePrice",
       "type": "error"
     },
     {
@@ -227,78 +195,8 @@
       "type": "error"
     },
     {
-      "inputs": [
-        {
-          "internalType": "uint80",
-          "name": "roundId",
-          "type": "uint80"
-        },
-        {
-          "internalType": "uint80",
-          "name": "answeredInRound",
-          "type": "uint80"
-        }
-      ],
-      "name": "PriceFeedRoundMismatch",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "age",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "maxAge",
-          "type": "uint256"
-        }
-      ],
-      "name": "PriceTooOld",
-      "type": "error"
-    },
-    {
       "inputs": [],
       "name": "ReentrancyGuardReentrantCall",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "remainingSeconds",
-          "type": "uint256"
-        }
-      ],
-      "name": "TeleportCooldown",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint32",
-          "name": "destination",
-          "type": "uint32"
-        }
-      ],
-      "name": "TeleportDestinationNotAllowed",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "currentPower",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "requiredPower",
-          "type": "uint256"
-        }
-      ],
-      "name": "TeleportPowerTooLow",
       "type": "error"
     },
     {
@@ -371,71 +269,9 @@
           "internalType": "uint8",
           "name": "clan",
           "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "internalType": "int256",
-          "name": "price",
-          "type": "int256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
         }
       ],
       "name": "CatMinted",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "bytes32",
-          "name": "source",
-          "type": "bytes32"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "newBalance",
-          "type": "uint256"
-        }
-      ],
-      "name": "JackpotAccrued",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "winner",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "JackpotAwarded",
       "type": "event"
     },
     {
@@ -505,49 +341,6 @@
         }
       ],
       "name": "RewardClaimed",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "indexed": true,
-          "internalType": "uint32",
-          "name": "fromChainId",
-          "type": "uint32"
-        },
-        {
-          "indexed": true,
-          "internalType": "uint32",
-          "name": "toChainId",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint8",
-          "name": "teleportCount",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint32",
-          "name": "visitedBitmap",
-          "type": "uint32"
-        },
-        {
-          "indexed": false,
-          "internalType": "bytes32",
-          "name": "payloadHash",
-          "type": "bytes32"
-        }
-      ],
-      "name": "TeleportCompleted",
       "type": "event"
     },
     {
@@ -721,144 +514,23 @@
       "outputs": [
         {
           "internalType": "uint256",
-          "name": "tokenId_",
+          "name": "_tokenId",
           "type": "uint256"
         },
         {
-          "components": [
-            {
-              "internalType": "uint8",
-              "name": "clan",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "temperament",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "fortuneTier",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "rarityTier",
-              "type": "uint8"
-            },
-            {
-              "internalType": "int32",
-              "name": "birthTrendBps",
-              "type": "int32"
-            },
-            {
-              "internalType": "uint32",
-              "name": "birthVolBucket",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint64",
-              "name": "epochId",
-              "type": "uint64"
-            },
-            {
-              "internalType": "uint64",
-              "name": "entropy",
-              "type": "uint64"
-            }
-          ],
-          "internalType": "struct VolatilityCats.OracleImprint",
-          "name": "imprint",
-          "type": "tuple"
+          "internalType": "uint8",
+          "name": "clan",
+          "type": "uint8"
         },
         {
-          "components": [
-            {
-              "internalType": "uint32",
-              "name": "power",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint16",
-              "name": "season",
-              "type": "uint16"
-            },
-            {
-              "internalType": "uint8",
-              "name": "rulesVersion",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint64",
-              "name": "lastMissionDaily",
-              "type": "uint64"
-            },
-            {
-              "internalType": "uint64",
-              "name": "lastMissionWeekly",
-              "type": "uint64"
-            },
-            {
-              "internalType": "uint64",
-              "name": "lastMissionMonthly",
-              "type": "uint64"
-            },
-            {
-              "internalType": "bool",
-              "name": "rewarded",
-              "type": "bool"
-            }
-          ],
-          "internalType": "struct VolatilityCats.CatGameState",
-          "name": "game",
-          "type": "tuple"
+          "internalType": "uint32",
+          "name": "power",
+          "type": "uint32"
         },
         {
-          "components": [
-            {
-              "internalType": "uint32",
-              "name": "currentChainId",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint32",
-              "name": "visitedChainsBitmap",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint8",
-              "name": "teleportCount",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "uniqueChainsVisited",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint64",
-              "name": "lastTeleportAt",
-              "type": "uint64"
-            },
-            {
-              "internalType": "bool",
-              "name": "isAlive",
-              "type": "bool"
-            },
-            {
-              "internalType": "bool",
-              "name": "jackpotEligible",
-              "type": "bool"
-            }
-          ],
-          "internalType": "struct VolatilityCats.TeleportState",
-          "name": "teleport",
-          "type": "tuple"
-        },
-        {
-          "internalType": "address",
-          "name": "ownerAddress",
-          "type": "address"
+          "internalType": "bool",
+          "name": "rewarded",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -883,34 +555,6 @@
           "internalType": "bool",
           "name": "rewarded",
           "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getJackpotState",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "balance",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "claimed",
-          "type": "bool"
-        },
-        {
-          "internalType": "address",
-          "name": "winner",
-          "type": "address"
-        },
-        {
-          "internalType": "uint8",
-          "name": "targetChains",
-          "type": "uint8"
         }
       ],
       "stateMutability": "view",
@@ -997,81 +641,6 @@
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getTeleportCooldown",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        }
-      ],
-      "name": "getTeleportState",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint32",
-              "name": "currentChainId",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint32",
-              "name": "visitedChainsBitmap",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint8",
-              "name": "teleportCount",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "uniqueChainsVisited",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint64",
-              "name": "lastTeleportAt",
-              "type": "uint64"
-            },
-            {
-              "internalType": "bool",
-              "name": "isAlive",
-              "type": "bool"
-            },
-            {
-              "internalType": "bool",
-              "name": "jackpotEligible",
-              "type": "bool"
-            }
-          ],
-          "internalType": "struct VolatilityCats.TeleportState",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "owner",
           "type": "address"
@@ -1091,42 +660,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "jackpotBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "jackpotConfig",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "mintFee",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "missionFee",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "teleportFee",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -1382,95 +915,6 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "teleportConfig",
-      "outputs": [
-        {
-          "internalType": "uint32",
-          "name": "cooldownSeconds",
-          "type": "uint32"
-        },
-        {
-          "internalType": "uint8",
-          "name": "targetChains",
-          "type": "uint8"
-        },
-        {
-          "internalType": "uint32",
-          "name": "powerCost",
-          "type": "uint32"
-        }
-      ],
-      "stateMutability": "pure",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "tokenId",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint32",
-          "name": "destinationChainId",
-          "type": "uint32"
-        },
-        {
-          "internalType": "bytes",
-          "name": "ccipPayload",
-          "type": "bytes"
-        }
-      ],
-      "name": "teleportToChain",
-      "outputs": [
-        {
-          "components": [
-            {
-              "internalType": "uint32",
-              "name": "currentChainId",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint32",
-              "name": "visitedChainsBitmap",
-              "type": "uint32"
-            },
-            {
-              "internalType": "uint8",
-              "name": "teleportCount",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint8",
-              "name": "uniqueChainsVisited",
-              "type": "uint8"
-            },
-            {
-              "internalType": "uint64",
-              "name": "lastTeleportAt",
-              "type": "uint64"
-            },
-            {
-              "internalType": "bool",
-              "name": "isAlive",
-              "type": "bool"
-            },
-            {
-              "internalType": "bool",
-              "name": "jackpotEligible",
-              "type": "bool"
-            }
-          ],
-          "internalType": "struct VolatilityCats.TeleportState",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "nonpayable",
       "type": "function"
     },
     {

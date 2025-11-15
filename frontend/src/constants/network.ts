@@ -37,13 +37,13 @@ const LOCAL_CONFIG = {
 // Monad Testnet Configuration
 const TESTNET_CONFIG = {
   contracts: {
-    CATS: import.meta.env.VITE_TESTNET_CATS_ADDRESS || '0x8a062D558ea29DF60EA4a185DdC2069426dEb1Fd',
-    CHURR: import.meta.env.VITE_TESTNET_CHURR_ADDRESS || '0xBF0ad8513dCf383aBacb5A41775bd2C42C26DdE9',
+    CATS: import.meta.env.VITE_TESTNET_CATS_ADDRESS || '0x141b1F681189E401a0f10bC3ceB76fab74Ba8Bbb',
+    CHURR: import.meta.env.VITE_TESTNET_CHURR_ADDRESS || '0x473f4e1426a865ABCADe3ef3CcC129602721F229',
   },
   network: {
-    chainId: Number(import.meta.env.VITE_TESTNET_CHAIN_ID) || 41454,
+    chainId: Number(import.meta.env.VITE_TESTNET_CHAIN_ID) || 10143,
     name: import.meta.env.VITE_TESTNET_CHAIN_NAME || 'Monad Testnet',
-    rpcUrl: import.meta.env.VITE_TESTNET_RPC_URL || 'https://rpc.testnet.monad.xyz',
+    rpcUrl: import.meta.env.VITE_TESTNET_RPC_URL || 'https://testnet-rpc.monad.xyz',
     blockExplorer: import.meta.env.VITE_TESTNET_EXPLORER_URL || 'https://explorer.testnet.monad.xyz',
   },
   feeds: {
