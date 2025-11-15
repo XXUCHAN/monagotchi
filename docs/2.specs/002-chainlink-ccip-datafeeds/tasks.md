@@ -1,11 +1,15 @@
 # Tasks: Chainlink CCIP & Datafeeds Integration
 
-## Phase 0: 환경 준비 및 조사 (현재 진행 중)
+## Phase 0: 환경 준비 및 조사 (완료)
 
 -   [x] **T001** Monad testnet RPC endpoint 확인: `https://monad-testnet.gateway.tatum.io/`
 -   [x] **T002** 배포용 개발 계정 생성: `0x606a8D01567974Ad83f554a49E2df4E8126908c5`
--   [ ] **T003** Monad testnet Chainlink 지원 현황 조사 및 대안 계획 수립
--   [ ] **T004** Hardhat 네트워크 설정 (Monad testnet용 config 추가)
+-   [x] **T003** Monad testnet Chainlink 지원 현황 조사 및 대안 계획 수립
+    -   CCIP 미지원 → Data Feeds 중심으로 진행
+    -   테스트넷 주소 부재 시 Mock 피드/옵션 명시
+-   [x] **T004** Hardhat 네트워크 설정 (Monad testnet용 config 추가)
+
+    -   `hardhat.config.js`, `network-config.ts`, `testnet-datastream.json` 정리 완료
 
 -   [x] **T101** `AssetRegistry.sol` 컨트랙트 구현 (v1 완료)
     -   자산별 feed 주소 저장 구조체 정의
@@ -23,29 +27,30 @@
 
 ## Phase 2: 테스트 및 배포 준비
 
--   [ ] **T201** 단위 테스트 작성 (`test/AssetRegistry.test.js`)
+-   [x] **T201** 단위 테스트 작성 (`test/contract/test_asset_registry.js`)
     -   자산 등록/수정/삭제 테스트
     -   권한 제어 테스트
     -   이벤트 emit 테스트
 -   [ ] **T202** 통합 테스트 작성 (`test/PriceFeedGuard.test.js`)
     -   가격 검증 로직 테스트
     -   stale/deviation 시나리오 테스트
--   [ ] **T203** VolatilityCats 가격 조회 통합 테스트
-    -   미션 실행 시 가격 검증 테스트
-    -   다양한 자산 지원 테스트
--   [ ] **T204** Hardhat 스크립트 개선
-    -   Monad testnet 배포 스크립트
-    -   자산 초기화 스크립트
-    -   잔액 확인 및 faucet 지원 스크립트
+-   [x] **T203** VolatilityCats 게임 루프 테스트 강화
+    -   미션/쿨다운/보상 테스트 확장 (`test_mission.js`, `test_reward.js`, etc.)
+    -   Oracle Imprint/조회 테스트 보강
+-   [x] **T204** Hardhat 스크립트 개선
+    -   `scripts/deploy.js`를 AssetRegistry 기반으로 리팩터
+    -   필수/선택 feed 등록 및 검증 로직 추가
+    -   `.env` 키 검증용 노드 스크립트 사용 가이드
 
 ## Phase 3: 배포 및 검증
 
--   [ ] **T301** 로컬 Hardhat 네트워크에서 완전 테스트
+-   [x] **T301** 로컬 Hardhat 네트워크에서 완전 테스트
     -   모든 컨트랙트 배포 및 연결 확인
     -   E2E 시나리오 테스트 (민팅 → 미션 → 보상)
--   [ ] **T302** Monad testnet 배포 준비
-    -   `.env` 파일 설정 및 검증
-    -   배포 스크립트 실행 및 주소 기록
+-   [x] **T302** Monad testnet 배포 준비 & 실행
+    -   `.env` 파일 설정 및 검증 (필수 feed 미제공 시 MockV3Aggregator 자동 배포)
+    -   `npm run deploy`로 ChurrToken/AssetRegistry/VolatilityCats 배포 완료
+    -   최신 주소: `0xBF0ad8513dCf383aBacb5A41775bd2C42C26DdE9` (CHURR), `0x152285CE8DADCCb4B10285eE077de870aF8d53FC` (AssetRegistry), `0x8a062D558ea29DF60EA4a185DdC2069426dEb1Fd` (VolatilityCats)
 -   [ ] **T303** 배포 후 검증
     -   컨트랙트 주소 및 커밋 SHA 기록
     -   기본 기능 테스트 (프론트엔드 연결 전)
@@ -55,7 +60,7 @@
 
 ## Phase 4: 프론트엔드 통합 준비
 
--   [ ] **T401** 컨트랙트 ABI 내보내기
+-   [x] **T401** 컨트랙트 ABI 내보내기
     -   TypeScript 타입 정의 생성
     -   프론트엔드에서 사용할 인터페이스 정리
 -   [ ] **T402** 네트워크 설정 공유

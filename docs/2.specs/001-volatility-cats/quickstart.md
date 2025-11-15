@@ -20,7 +20,7 @@ npm install
 # 환경변수 설정 (.env 파일 생성)
 cp .env.example .env
 # 필수 ENV 예시 (테스트넷 기준)
-# MONAD_RPC_URL="https://rpc.testnet.monad.xyz"
+# MONAD_RPC_URL="https://testnet-rpc.monad.xyz/"
 # MONAD_PRIVATE_KEY="0xYOUR_PRIVATE_KEY"
 # BTC_USD_FEED="0x... 실제 Chainlink BTC/USD 피드 주소"
 # ETH_USD_FEED="0x... 실제 Chainlink ETH/USD 피드 주소"
