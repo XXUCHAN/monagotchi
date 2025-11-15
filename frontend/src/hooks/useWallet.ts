@@ -1,7 +1,7 @@
 import { usePrivy } from '@privy-io/react-auth'
 import { BrowserProvider, JsonRpcProvider } from 'ethers'
 import { useMemo } from 'react'
-import { NETWORK } from '../utils/constants'
+import { NETWORK } from '../constants'
 
 export function useWallet() {
   const { ready, authenticated, user } = usePrivy()

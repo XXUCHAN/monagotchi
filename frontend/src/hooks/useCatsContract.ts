@@ -179,18 +179,48 @@ export function useCatsContract() {
   /**
    * Get user's cat token IDs
    * @param address - User wallet address
+   * 
+   * Note: Since VolatilityCats doesn't inherit ERC721Enumerable,
+   * we need to iterate through all token IDs and check ownership.
+   * This is inefficient but works for local development with few tokens.
    */
   const getUserCatTokenIds = async (address: string) => {
     if (!catsContract) return [];
-    const balance = await catsContract.balanceOf(address);
-    const tokenIds: bigint[] = [];
-
-    for (let i = 0; i < Number(balance); i++) {
-      const tokenId = await catsContract.tokenOfOwnerByIndex(address, i);
-      tokenIds.push(tokenId);
+    
+    try {
+      const balance = await catsContract.balanceOf(address);
+      const balanceNum = Number(balance);
+      
+      if (balanceNum === 0) return [];
+      
+      // Get nextTokenId to know the range
+      // We'll check all token IDs from 0 to nextTokenId-1
+      // This is inefficient but simple for local dev
+      const tokenIds: bigint[] = [];
+      
+      // We'll check up to the first 100 tokens (should be enough for local dev)
+      // In production, you'd want to use Transfer events or ERC721Enumerable
+      const maxTokenId = 100;
+      let found = 0;
+      
+      for (let tokenId = 0; tokenId < maxTokenId && found < balanceNum; tokenId++) {
+        try {
+          const owner = await catsContract.ownerOf(tokenId);
+          if (owner.toLowerCase() === address.toLowerCase()) {
+            tokenIds.push(BigInt(tokenId));
+            found++;
+          }
+        } catch (error) {
+          // Token doesn't exist, continue
+          continue;
+        }
+      }
+      
+      return tokenIds;
+    } catch (error) {
+      console.error('Error getting user cat token IDs:', error);
+      return [];
     }
-
-    return tokenIds;
   };
 
   return {
