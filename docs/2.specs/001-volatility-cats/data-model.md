@@ -5,7 +5,7 @@
 ```typescript
 // 민팅 시점 시장 상태를 담는 Oracle Imprint
 interface OracleImprint {
-    clan: uint8;            // 클랜 (0=BTC,1=ETH,2=SOL,3=MONAD,...)
+    clan: uint8;            // 클랜 (0=BTC,1=ETH,2=SOL,3=DOGE,4=PEPE,5=LINK,...)
     temperament: uint8;     // 성격 (0=비관,1=중립,2=낙관,...)
     fortuneTier: uint8;     // 포츈 티어 (0=가난,1=보통,2=부자)
     rarityTier: uint8;      // 희귀도 티어 (0=일반,1=레어,2=레전더리)

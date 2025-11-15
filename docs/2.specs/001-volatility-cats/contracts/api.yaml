@@ -134,8 +134,8 @@ components:
       properties:
         clan:
           type: integer
-          enum: [0, 1]
-          description: "클랜: 0=BTC, 1=ETH (추후 SOL, MONAD 등 확장 가능)"
+          enum: [0, 1, 2, 3, 4, 5]
+          description: "클랜 ID: AssetRegistry에 등록된 순서 (0=BTC,1=ETH,2=SOL,3=DOGE,4=PEPE,5=LINK)"
 
     MintResponse:
       type: object
@@ -215,7 +215,7 @@ components:
           properties:
             clan:
               type: integer
-              description: "클랜: 0=BTC,1=ETH,2=SOL,3=MONAD..."
+              description: "클랜: AssetRegistry에 등록된 자산 ID (0=BTC,1=ETH,2=SOL,3=DOGE,4=PEPE,5=LINK)"
             temperament:
               type: integer
               description: "성격: 0=비관,1=중립,2=낙관..."

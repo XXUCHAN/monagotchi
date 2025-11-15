@@ -7,8 +7,9 @@
 
     "Clan": {
       "type": "integer",
-      "enum": [0, 1],
-      "description": "고양이 클랜: 0=BTC, 1=ETH (추후 SOL, MONAD 등 확장 가능)"
+      "minimum": 0,
+      "maximum": 5,
+      "description": "고양이 클랜 ID (AssetRegistry에 등록된 자산: 0=BTC,1=ETH,2=SOL,3=DOGE,4=PEPE,5=LINK)"
     },
 
     "MissionType": {

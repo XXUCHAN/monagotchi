@@ -6,6 +6,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {IChurrToken} from "./interfaces/IChurrToken.sol";
+import {AssetRegistry} from "./registry/AssetRegistry.sol";
+import {PriceFeedGuard} from "./libraries/PriceFeedGuard.sol";
 
 contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
     // Custom errors
@@ -70,33 +72,125 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
     uint32 private epochWindow; // 에폭 계산용 윈도우 (초 단위)
 
     mapping(uint256 => Cat) private cats;
-    mapping(uint8 => address) private clanFeeds; // clanId => priceFeed 주소
-    mapping(uint8 => bool) private clanEnabled; // clan 활성화 상태
+    AssetRegistry private assetRegistry;
 
     IChurrToken private fishToken;
 
     constructor(
         address _fishToken,
+        address _assetRegistry,
         uint32 _epochWindow
     ) ERC721("VolatilityCats", "VCAT") Ownable(msg.sender) {
         fishToken = IChurrToken(_fishToken);
+        assetRegistry = AssetRegistry(_assetRegistry);
         epochWindow = _epochWindow;
         nextTokenId = 0;
     }
 
-    // 관리자 함수들
+    // 관리자 함수들 (deprecated - use addAsset/updateAsset instead)
     function setClanFeed(
         uint8 clan,
-        address feedAddress,
+        address /* feedAddress */, // deprecated parameter
         bool enabled
     ) external onlyOwner {
-        clanFeeds[clan] = feedAddress;
-        clanEnabled[clan] = enabled;
+        bytes32 assetId = getAssetIdFromClan(clan);
+        assetRegistry.setAssetEnabled(assetId, enabled);
+        // Note: feedAddress update should be done via AssetRegistry.addAsset() or updateAsset()
+    }
+
+    /**
+     * @notice Add a new asset to the registry (admin only)
+     * @param assetName Asset name (e.g., "BTC_USD")
+     * @param feedAddress Chainlink price feed address
+     * @param decimals Price feed decimals
+     * @param volatilityTier Asset volatility tier (0-2)
+     * @param maxExposureBps Maximum exposure in basis points
+     */
+    function addAsset(
+        string calldata assetName,
+        address feedAddress,
+        uint8 decimals,
+        uint8 volatilityTier,
+        uint16 maxExposureBps
+    ) external onlyOwner {
+        bytes32 assetId = keccak256(abi.encodePacked(assetName));
+        assetRegistry.addAsset(
+            assetId,
+            feedAddress,
+            decimals,
+            volatilityTier,
+            maxExposureBps
+        );
+    }
+
+    /**
+     * @notice Update an existing asset in the registry (admin only)
+     * @param assetName Asset name (e.g., "BTC_USD")
+     * @param feedAddress New Chainlink price feed address
+     * @param decimals New price feed decimals
+     * @param volatilityTier New asset volatility tier
+     * @param maxExposureBps New maximum exposure
+     */
+    function updateAsset(
+        string calldata assetName,
+        address feedAddress,
+        uint8 decimals,
+        uint8 volatilityTier,
+        uint16 maxExposureBps
+    ) external onlyOwner {
+        bytes32 assetId = keccak256(abi.encodePacked(assetName));
+        assetRegistry.updateAsset(
+            assetId,
+            feedAddress,
+            decimals,
+            volatilityTier,
+            maxExposureBps
+        );
+    }
+
+    /**
+     * @notice Enable or disable an asset (admin only)
+     * @param assetName Asset name
+     * @param enabled Whether to enable the asset
+     */
+    function setAssetEnabled(
+        string calldata assetName,
+        bool enabled
+    ) external onlyOwner {
+        bytes32 assetId = keccak256(abi.encodePacked(assetName));
+        assetRegistry.setAssetEnabled(assetId, enabled);
+    }
+
+    /**
+     * @notice Convert clan ID to asset ID
+     * @param clan Clan identifier (0=BTC, 1=ETH, 2=SOL, 3=DOGE, 4=PEPE, 5=LINK)
+     * @return Asset ID (keccak256 hash)
+     */
+    function getAssetIdFromClan(uint8 clan) public pure returns (bytes32) {
+        string memory assetName;
+        if (clan == 0) assetName = "BTC_USD";
+        else if (clan == 1) assetName = "ETH_USD";
+        else if (clan == 2) assetName = "SOL_USD";
+        else if (clan == 3) assetName = "DOGE_USD";
+        else if (clan == 4) assetName = "PEPE_USD";
+        else if (clan == 5) assetName = "LINK_USD";
+        else revert InvalidClan();
+
+        return keccak256(abi.encodePacked(assetName));
+    }
+
+    /**
+     * @notice Get asset registry address
+     * @return Asset registry contract address
+     */
+    function getAssetRegistry() external view returns (address) {
+        return address(assetRegistry);
     }
 
     // 민팅 함수
     function mintRandomCat(uint8 clan) external returns (uint256) {
-        if (!clanEnabled[clan]) revert InvalidClan();
+        bytes32 assetId = getAssetIdFromClan(clan);
+        if (!assetRegistry.isAssetEnabled(assetId)) revert InvalidClan();
 
         uint256 tokenId = nextTokenId++;
         _mint(msg.sender, tokenId);
@@ -123,8 +217,8 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
     function _generateOracleImprint(
         uint8 clan
     ) private view returns (OracleImprint memory) {
-        address feedAddress = clanFeeds[clan];
-        require(feedAddress != address(0), "Price feed not set");
+        bytes32 assetId = getAssetIdFromClan(clan);
+        address feedAddress = assetRegistry.getAssetFeed(assetId);
 
         AggregatorV3Interface priceFeed = AggregatorV3Interface(feedAddress);
 

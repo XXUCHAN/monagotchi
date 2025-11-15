@@ -1,0 +1,5 @@
+📍 주소: 0xB01E0188665fc89a1335b602aaB741272a5AaD41
+🔑 프라이빗 키: 0xda1c756827861f9aeb7dfd700eab658d5a128952ea560d7fea5500bf82daa01c
+🧠 시드 문구: begin dawn rubber van aisle toilet aerobic invest art angle staff symptom
+🌐 네트워크: Monad Testnet (Chain ID: 10143)
+🔗 RPC URL: https://testnet-rpc.monad.xyz/

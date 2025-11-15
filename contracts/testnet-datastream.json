@@ -6,5 +6,22 @@
     "USDT_USD": "0x14eE6bE30A919B8951Dc23203E41C804D4D71d441",
     "SOL_USD": "0x1c2f27C736aC97886F017AbdEedEd81C3C38Af73e",
     "DOGE_USD": "0x7F1c8B16B1a16AA5a8e720dA162f0d9191f2e6EC5",
-    "PEPE_USD": "0x5db2F4591D04CABC9eE5C4016e9477A80d383D298"
+    "PEPE_USD": "0x5db2F4591D04CABC9eE5C4016e9477A80d383D298",
+
+    "_monad_testnet_note": "Monad testnet Chainlink feeds not yet available. Will update when supported.",
+    "_comment": "Monad testnet용 Chainlink Data Feeds 주소 (현재 지원되지 않음 - Mock 데이터 사용)",
+    "_note": "실제 Monad mainnet에서 Chainlink가 지원되면 이 주소들을 업데이트하세요",
+    "_reference": "https://docs.chain.link/data-feeds/price-feeds/addresses",
+    "_status": "mock-only",
+    "_rpc": "https://monad-testnet.gateway.tatum.io/",
+    "_mock_prices": {
+        "BTC_USD": 95000,
+        "ETH_USD": 3200,
+        "LINK_USD": 18,
+        "USDC_USD": 1,
+        "USDT_USD": 1,
+        "SOL_USD": 180,
+        "DOGE_USD": 0.35,
+        "PEPE_USD": 0.000012
+    }
 }
