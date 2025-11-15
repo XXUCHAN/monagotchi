@@ -6,11 +6,11 @@ Author/Requester: User
 
 ## Summary (≤500 chars)
 
-Monad Testnet + Chainlink Data Feeds + Privy를 활용한 소셜 펫 게임 컨트랙트 구현. 사용자는 BTC/ETH 진영 고양이를 민팅하고, Chainlink 가격 데이터를 활용한 미션으로 파워를 키워 FISH 토큰 보상을 받는 게임. 6시간 내 MVP 완성 목표로 프론트엔드는 제외하고 컨트랙트 구현에 집중.
+Monad Testnet + Chainlink Data Feeds + Privy를 활용한 소셜 펫 게임 컨트랙트 구현. 사용자는 BTC/ETH 진영 고양이를 민팅하고, Chainlink 가격 데이터를 활용한 미션으로 파워를 키워 CHURR 토큰 보상을 받는 게임. 6시간 내 MVP 완성 목표로 프론트엔드는 제외하고 컨트랙트 구현에 집중.
 
 ## Context & Sources
 
-- Files: contracts/VolatilityCats.sol, contracts/FishToken.sol
+- Files: contracts/VolatilityCats.sol, contracts/ChurrToken.sol
 - Links: https://docs.monad.xyz/, https://dev.chain.link/changelog/data-feeds-on-monad-testnet
 
 ## Problem Statement
@@ -36,7 +36,7 @@ Monad Testnet + Chainlink Data Feeds + Privy를 활용한 소셜 펫 게임 컨�
 
 1. Given 사용자가 BTC 진영 선택 시, When 민팅하면, Then BTC alignment 고양이 생성
 2. Given 고양이가 미션 실행 시, When Chainlink 가격 데이터 활용하면, Then 확률적 파워 증가
-3. Given 파워 50 이상 고양이, When 보상 청구하면, Then 10 FISH 토큰 지급
+3. Given 파워 50 이상 고양이, When 보상 청구하면, Then 10 CHURR 토큰 지급
 
 ## Risks & Constraints
 

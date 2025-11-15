@@ -152,17 +152,17 @@
       }
     },
 
-    "FishToken": {
+    "ChurrToken": {
       "type": "object",
       "required": ["name", "symbol", "decimals", "totalSupply"],
       "properties": {
         "name": {
           "type": "string",
-          "enum": ["FishToken"]
+          "enum": ["Churr"]
         },
         "symbol": {
           "type": "string",
-          "enum": ["FISH"]
+          "enum": ["CHURR"]
         },
         "decimals": {
           "type": "integer",
@@ -253,7 +253,7 @@
             }
           }
         },
-        "FishToken": {
+        "ChurrToken": {
           "type": "object",
           "properties": {
             "address": {

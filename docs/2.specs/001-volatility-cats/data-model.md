@@ -41,10 +41,10 @@ interface VolatilityCat {
     owner: address;
 }
 
-interface FishToken {
+interface ChurrToken {
     // 표준 ERC20 토큰
-    name: "FishToken";
-    symbol: "FISH";
+    name: "Churr";
+    symbol: "CHURR";
     decimals: 18;
     totalSupply: uint256;
 }
@@ -53,7 +53,7 @@ interface FishToken {
 ## Relationships
 
 - **VolatilityCat.imprint.clan → PriceFeed**: clan별 Chainlink 가격 피드 연결
-- **VolatilityCat.game.power → FishToken**: 고양이 파워가 임계값 이상일 때 FISH 토큰 보상
+- **VolatilityCat.game.power → ChurrToken**: 고양이 파워가 임계값 이상일 때 CHURR 토큰 보상
 - **Owner → VolatilityCat**: ERC721 소유권 관계 (1:N)
 
 ## Validation Rules
@@ -63,9 +63,9 @@ interface FishToken {
 - `imprint.temperament`: 0(비관), 1(중립), 2(낙관) 중 하나
 - `imprint.fortuneTier`: 0(가난), 1(보통), 2(부자) 중 하나
 - `imprint.rarityTier`: 0(일반), 1(레어), 2(레전더리) 중 하나
-- `imprint.birthTrendBps`: -10000 ≤ birthTrendBps ≤ 10000 (±100% 범위, 초과 시 클램프) `[NEEDS CLARIFICATION: 정확한 계산식]`
-- `imprint.birthVolBucket`: 0=Low, 1=Mid, 2=High ... (절대 값 또는 변동성 지표 기반 버킷) `[NEEDS CLARIFICATION: 버킷 기준]`
-- `imprint.epochId`: `block.timestamp / epochWindow` (예: 3600초) `[NEEDS CLARIFICATION: epochWindow 값]`
+- `imprint.birthTrendBps`: -10000 ≤ birthTrendBps ≤ 10000 (±100% 범위, `_calculatePriceTrend`에서 엔트로피와 가격을 기반으로 산출)
+- `imprint.birthVolBucket`: 0=Low, 1=Mid, 2=High (Chainlink 가격의 하위 비트로부터 `price % 3`으로 계산)
+- `imprint.epochId`: `block.timestamp / epochWindow` (기본값으로 3600초(1시간) 기준 에폭, 배포 시 epochWindow 설정 가능)
 - `game.power`: 0 ≤ power ≤ 2^32-1
 - `game.season`: 0 이상 정수, 시즌 변경 시 증가
 - `game.rulesVersion`: 룰셋 변경 시 증가 (예: v1=기본, v2=변동성 룰렛 추가)
@@ -77,8 +77,8 @@ interface FishToken {
 - 소유자만 미션 실행 가능
 - 쿨다운 시간 준수:
   - Daily: 12시간
-  - Weekly: 1일 (86400초)
-  - Monthly: 3일 (259200초)
+  - Weekly: 7일 (604800초)
+  - Monthly: 30일 (2592000초)
 - Chainlink 가격 데이터 사용 가능성 검증
 
 ### Reward Claim

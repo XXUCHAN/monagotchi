@@ -1,0 +1,17 @@
+node_modules/
+artifacts/
+cache/
+coverage/
+broadcast/
+.env
+.env.local
+.env.*
+
+contracts/node_modules/
+contracts/artifacts/
+contracts/cache/
+contracts/coverage/
+contracts/broadcast/
+contracts/.env
+contracts/.env.local
+contracts/.env.*

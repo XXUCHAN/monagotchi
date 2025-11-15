@@ -6,7 +6,34 @@
 - Hardhat 설치됨
 - Monad Testnet RPC 접근 가능
 - Chainlink Data Feeds 주소 확인됨
-- 테스트 ETH 보유
+- 테스트 ETH 보유 (Faucet: https://testnet.monad.xyz/faucet)
+
+## 환경 설정
+
+```bash
+# contracts 디렉터리로 이동
+cd contracts
+
+# 의존성 설치
+npm install
+
+# 환경변수 설정 (.env 파일 생성)
+cp .env.example .env
+# .env 파일에 실제 값들 입력:
+# MONAD_RPC_URL="https://rpc.testnet.monad.xyz"
+# MONAD_PRIVATE_KEY="0xYOUR_PRIVATE_KEY"
+# BTC_USD_FEED="0xBTC_FEED_ADDRESS"
+# ETH_USD_FEED="0xETH_FEED_ADDRESS"
+
+# 테스트 실행
+npm test
+
+# 로컬 배포 (개발용)
+npm run deploy:local
+
+# 테스트넷 배포
+npm run deploy
+```
 
 ## Scenarios (PASS/FAIL) with steps and success criteria
 
@@ -15,8 +42,8 @@
 **목적**: 컨트랙트 배포 및 기본 민팅 기능 검증
 
 **단계**:
-1. `FishToken` 컨트랙트 배포
-2. `VolatilityCats` 컨트랙트 배포 (FishToken 주소, 가격 피드 주소 전달)
+1. `ChurrToken` 컨트랙트 배포
+2. `VolatilityCats` 컨트랙트 배포 (ChurrToken 주소, 가격 피드 주소 전달)
 3. `mintRandomCat(0)` 호출하여 BTC 고양이 민팅
 4. `getCat(0)` 호출하여 민팅된 고양이 정보 조회
 
@@ -63,12 +90,12 @@
 **단계**:
 1. 미션 반복 실행으로 파워 50+ 달성
 2. `claimReward(0)` 호출
-3. FISH 토큰 잔액 증가 확인
+3. CHURR 토큰 잔액 증가 확인
 4. `getCat(0)`으로 rewarded = true 확인
 
 **성공 기준**:
 - ✅ 파워 50 미만시 claim 실패
-- ✅ 파워 50+ 시 10 FISH 토큰 지급
+- ✅ 파워 50+ 시 10 CHURR 토큰 지급
 - ✅ rewarded 플래그 true로 변경
 - ✅ RewardClaimed 이벤트 발생
 
@@ -109,10 +136,10 @@
 3. 테스트넷 블록 시간 고려 (빠를 수 있음)
 
 ### 문제: 토큰 잔액 증가 없음
-**증상**: 보상 claim 후 FISH 잔액 변동 없음
+**증상**: 보상 claim 후 CHURR 잔액 변동 없음
 **해결**:
-1. FishToken 컨트랙트 주소가 VolatilityCats에 올바르게 설정되었는지 확인
-2. VolatilityCats가 FishToken의 owner인지 확인
+1. ChurrToken 컨트랙트 주소가 VolatilityCats에 올바르게 설정되었는지 확인
+2. VolatilityCats가 ChurrToken의 owner인지 확인
 3. 트랜잭션 성공 여부 및 이벤트 로그 확인
 
 ## Result Log (table)
@@ -122,7 +149,7 @@
 | 1. 민팅 | ✅ PASS | 25초 | 85k | 정상 |
 | 2. Daily 미션 | ✅ PASS | 40초 | 120k | 파워 +3 |
 | 3. 쿨다운 | ✅ PASS | 35초 | 95k | 정상 |
-| 4. 보상 | ✅ PASS | 28초 | 88k | 10 FISH 지급 |
+| 4. 보상 | ✅ PASS | 28초 | 88k | 10 CHURR 지급 |
 | 5. 소유권 | ✅ PASS | 32초 | 92k | 정상 |
 
 **전체 결과**: 5/5 시나리오 통과 ✅
