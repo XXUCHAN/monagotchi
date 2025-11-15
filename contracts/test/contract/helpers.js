@@ -1,4 +1,5 @@
 const { ethers } = require('hardhat');
+const { time } = require('@nomicfoundation/hardhat-network-helpers');
 
 const DECIMALS = 8;
 const BTC_PRICE = 50_000n * 10n ** 8n;
@@ -21,20 +22,8 @@ async function deployCatsFixture() {
     const AssetRegistry = await ethers.getContractFactory('AssetRegistry');
     const assetRegistry = await AssetRegistry.deploy();
 
-    await assetRegistry.addAsset(
-        BTC_ASSET_ID,
-        await btcFeed.getAddress(),
-        DECIMALS,
-        2,
-        5000
-    );
-    await assetRegistry.addAsset(
-        ETH_ASSET_ID,
-        await ethFeed.getAddress(),
-        DECIMALS,
-        2,
-        6000
-    );
+    await assetRegistry.addAsset(BTC_ASSET_ID, await btcFeed.getAddress(), DECIMALS, 2, 5000);
+    await assetRegistry.addAsset(ETH_ASSET_ID, await ethFeed.getAddress(), DECIMALS, 2, 6000);
 
     const VolatilityCats = await ethers.getContractFactory('VolatilityCats');
     const cats = await VolatilityCats.deploy(
@@ -65,6 +54,21 @@ async function mintCat(cats, signer, clan = 0) {
     return Number(tokenId);
 }
 
+async function ensurePower(cats, signer, tokenId, minPower, missionType = 0, feed) {
+    const DAILY = 12 * 60 * 60;
+    while (true) {
+        const [, , gameState] = await cats.getCat(tokenId);
+        if (gameState.power >= BigInt(minPower)) {
+            break;
+        }
+        await cats.connect(signer).runMission(tokenId, missionType);
+        await time.increase(DAILY + 1);
+        if (feed) {
+            await feed.updateAnswer(BTC_PRICE);
+        }
+    }
+}
+
 module.exports = {
     BTC_PRICE,
     ETH_PRICE,
@@ -74,4 +78,5 @@ module.exports = {
     ETH_ASSET_ID,
     deployCatsFixture,
     mintCat,
+    ensurePower,
 };
