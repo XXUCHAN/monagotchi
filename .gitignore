@@ -15,3 +15,5 @@ contracts/broadcast/
 contracts/.env
 contracts/.env.local
 contracts/.env.*
+
+.cursor/*
