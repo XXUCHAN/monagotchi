@@ -48,7 +48,13 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
     }
 
     // 이벤트들
-    event CatMinted(uint256 indexed tokenId, address indexed owner, uint8 clan);
+    event CatMinted(
+        uint256 indexed tokenId,
+        address indexed owner,
+        uint8 clan,
+        int256 price,
+        uint256 timestamp
+    );
     event MissionCompleted(
         uint256 indexed tokenId,
         uint8 missionType,
@@ -192,6 +198,12 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
         bytes32 assetId = getAssetIdFromClan(clan);
         if (!assetRegistry.isAssetEnabled(assetId)) revert InvalidClan();
 
+        // 민트 시점의 가격 데이터 가져오기 (로깅용)
+        address feedAddress = assetRegistry.getAssetFeed(assetId);
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(feedAddress);
+        (, int256 currentPrice, , uint256 priceTimestamp, ) = priceFeed
+            .latestRoundData();
+
         uint256 tokenId = nextTokenId++;
         _mint(msg.sender, tokenId);
 
@@ -209,7 +221,7 @@ contract VolatilityCats is ERC721, Ownable, ReentrancyGuard {
 
         cats[tokenId] = Cat(imprint, gameState);
 
-        emit CatMinted(tokenId, msg.sender, clan);
+        emit CatMinted(tokenId, msg.sender, clan, currentPrice, priceTimestamp);
         return tokenId;
     }
 
