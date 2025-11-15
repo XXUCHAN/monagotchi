@@ -22,6 +22,11 @@ module.exports = {
         },
     },
     networks: {
+        localhost: {
+            url: 'http://127.0.0.1:8545',
+            chainId: 31337,
+            accounts: 'remote', // Hardhat의 기본 계정 사용
+        },
         monadTestnet: {
             url: resolvedMonadRpc,
             accounts: MONAD_PRIVATE_KEY ? [MONAD_PRIVATE_KEY] : [],

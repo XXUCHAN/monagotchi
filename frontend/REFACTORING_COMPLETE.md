@@ -10,14 +10,14 @@
 
 ### Before & After
 
-| 항목 | Before | After | 개선율 |
-|------|--------|-------|--------|
-| `useContract.ts` | 182줄 (모놀리식) | 36줄 (통합 훅) + 분리된 훅 | -67% |
-| `constants.ts` | 142줄 (단일 파일) | 7개 파일 (평균 30줄) | 모듈화 |
-| `helpers.ts` | 188줄 (단일 파일) | 5개 파일 (평균 40줄) | 모듈화 |
-| 중복 코드 | 2개 함수 중복 | 0개 | -100% |
-| 폴더 구조 | Flat | 계층적 (config/, constants/, lib/) | +++ |
-| 타입 안정성 | 부분적 | 완전 (type-only imports) | +++ |
+| 항목             | Before            | After                              | 개선율 |
+| ---------------- | ----------------- | ---------------------------------- | ------ |
+| `useContract.ts` | 182줄 (모놀리식)  | 36줄 (통합 훅) + 분리된 훅         | -67%   |
+| `constants.ts`   | 142줄 (단일 파일) | 7개 파일 (평균 30줄)               | 모듈화 |
+| `helpers.ts`     | 188줄 (단일 파일) | 5개 파일 (평균 40줄)               | 모듈화 |
+| 중복 코드        | 2개 함수 중복     | 0개                                | -100%  |
+| 폴더 구조        | Flat              | 계층적 (config/, constants/, lib/) | +++    |
+| 타입 안정성      | 부분적            | 완전 (type-only imports)           | +++    |
 
 ---
 
@@ -76,16 +76,19 @@ src/
 ### 1️⃣ Phase 1: 중복 제거 및 설정 분리
 
 **생성된 파일**:
+
 - ✅ `config/toaster.config.ts` - Toast 알림 설정 분리
 - ✅ `constants/messages.ts` - 사용자 메시지 중앙화
 
 **제거된 중복**:
+
 - ❌ `helpers.ts`의 `parseContractError` (중복)
 - ❌ 인라인 Toast 설정 (App.tsx)
 
 ### 2️⃣ Phase 2: Constants 구조화
 
 **분리된 파일** (`utils/constants.ts` → `constants/`):
+
 - ✅ `contracts.ts` - CONTRACTS, PRICE_FEEDS
 - ✅ `network.ts` - NETWORK
 - ✅ `game.ts` - CLAN, MISSION_TYPE, COOLDOWN_TIMES, POWER_THRESHOLD, REWARD_AMOUNT
@@ -96,6 +99,7 @@ src/
 ### 3️⃣ Phase 3: Helpers → Lib 구조화
 
 **분리된 파일** (`utils/helpers.ts` → `lib/`):
+
 - ✅ `address.ts` - shortenAddress, getExplorerTxUrl, getExplorerAddressUrl
 - ✅ `time.ts` - formatTimeRemaining, formatDate, getRemainingCooldown, isMissionReady, sleep
 - ✅ `format.ts` - formatNumber, formatTokenAmount
@@ -106,22 +110,25 @@ src/
 ### 4️⃣ Phase 4: useContract 분리
 
 **분리된 파일** (`hooks/useContract.ts` → 3개 파일):
+
 - ✅ `useCatsContract.ts` (209줄) - VolatilityCats 전용 훅
-  - Write: mintCat, completeMission, claimReward
-  - Read: getCat, getOracleImprint, getGameState, getRemainingCooldown, getRewardAmount, getUserCatCount, getUserCatTokenIds
+    - Write: mintCat, completeMission, claimReward
+    - Read: getCat, getOracleImprint, getGameState, getRemainingCooldown, getRewardAmount, getUserCatCount, getUserCatTokenIds
 - ✅ `useChurrContract.ts` (40줄) - ChurrToken 전용 훅
-  - Read: getChurrBalance
+    - Read: getChurrBalance
 - ✅ `useContract.ts` (36줄) - 통합 훅 (Facade Pattern)
 - ✅ `index.ts` - 배럴 export
 
 ### 5️⃣ Phase 5: 컴포넌트 업데이트
 
 **App.tsx**:
+
 - ✅ Toaster 설정 → `toasterConfig` 사용
 - ✅ FeatureCard 데이터 → `FEATURES` 배열 맵핑
 - ✅ 하드코딩 제거
 
 **Dashboard.tsx**:
+
 - ✅ `onMintCat` prop 제거
 - ✅ `useContract` 훅 직접 사용
 - ✅ `handleMintCat` 로직 구현 (CLAN.BTC 기본값)
@@ -130,12 +137,14 @@ src/
 ### 6️⃣ Phase 6: Main 브랜치 통합
 
 **충돌 해결**:
+
 - ✅ ABI 경로 통일: `src/abi/` (main 브랜치 규칙 적용)
 - ✅ ABI 타입 적용: `InterfaceAbi` 타입 사용
 - ✅ 중복 폴더 제거: `src/contracts/abis/` 삭제
 - ✅ 리팩토링 구조 유지
 
 **변경된 파일**:
+
 - ♻️ `useCatsContract.ts` - ABI import 경로 변경
 - ♻️ `useChurrContract.ts` - ABI import 경로 변경
 - ♻️ `useContract.ts` - 통합 훅 구조 유지
@@ -145,18 +154,21 @@ src/
 ## 🎯 기대 효과
 
 ### 개발 생산성
+
 - ✅ **모듈화**: 기능별로 파일이 분리되어 유지보수 용이
 - ✅ **가독성**: 작은 파일 크기 (평균 30-40줄)로 코드 이해 쉬움
 - ✅ **재사용성**: 배럴 export로 import 경로 간소화
 - ✅ **타입 안정성**: type-only imports로 빌드 시 타입 에러 방지
 
 ### 코드 품질
+
 - ✅ **DRY 원칙**: 중복 코드 제거
 - ✅ **SRP 원칙**: 단일 책임 원칙 준수
 - ✅ **OCP 원칙**: 확장에 열려있고 수정에 닫혀있음
 - ✅ **Facade Pattern**: useContract가 복잡도 감춤
 
 ### 유지보수
+
 - ✅ **컨트랙트 변경**: useCatsContract만 수정
 - ✅ **메시지 변경**: constants/messages.ts만 수정
 - ✅ **상수 변경**: 해당 constants 파일만 수정
@@ -167,11 +179,13 @@ src/
 ## 📋 검증 결과
 
 ### Linter
+
 ```bash
 ✅ No linter errors found in src/
 ```
 
 ### TypeScript
+
 ```bash
 ✅ All type errors resolved
 ✅ type-only imports applied
@@ -179,6 +193,7 @@ src/
 ```
 
 ### Import 경로
+
 ```bash
 ✅ constants/ - 7개 파일 정상 export
 ✅ lib/ - 5개 파일 정상 export
@@ -187,6 +202,7 @@ src/
 ```
 
 ### Git 상태
+
 ```bash
 ✅ Merge conflict resolved (useContract.ts)
 ✅ ABI path unified (src/abi/)
@@ -199,6 +215,7 @@ src/
 ## 🚀 다음 단계
 
 ### 1️⃣ 머지 완료
+
 ```bash
 # 충돌 해결 커밋
 git commit -m "resolve: merge conflict - refactored structure + main ABI path"
@@ -212,6 +229,7 @@ git push origin main
 ```
 
 ### 2️⃣ 빌드 & 테스트
+
 ```bash
 # 빌드 테스트
 npm run build
@@ -226,6 +244,7 @@ VITE_CHURR_CONTRACT_ADDRESS=...
 ```
 
 ### 3️⃣ 정리 (선택사항)
+
 ```bash
 # 기존 utils 폴더 파일 제거 (이미 lib/constants로 이동)
 rm src/utils/constants.ts
@@ -242,22 +261,25 @@ rm src/utils/helpers.ts
 ### Import 경로 변경
 
 **Before**:
+
 ```typescript
-import { CONTRACTS } from '../utils/constants'
-import { parseContractError } from '../utils/contractErrors'
-import { shortenAddress } from '../utils/helpers'
+import { CONTRACTS } from '../utils/constants';
+import { parseContractError } from '../utils/contractErrors';
+import { shortenAddress } from '../utils/helpers';
 ```
 
 **After**:
+
 ```typescript
-import { CONTRACTS } from '../constants'
-import { parseContractError } from '../lib/errors'
-import { shortenAddress } from '../lib/address'
+import { CONTRACTS } from '../constants';
+import { parseContractError } from '../lib/errors';
+import { shortenAddress } from '../lib/address';
 ```
 
 ### useContract 사용법 (변경 없음)
+
 ```typescript
-const { mintCat, getCat, getChurrBalance } = useContract()
+const { mintCat, getCat, getChurrBalance } = useContract();
 ```
 
 ---
@@ -279,4 +301,3 @@ const { mintCat, getCat, getChurrBalance } = useContract()
 
 **작성자**: AI Agent
 **리뷰 필요**: 환경변수 설정, 빌드 테스트, 기능 테스트
-
