@@ -1,11 +1,11 @@
 // Oracle Imprint (from contract)
 export interface OracleImprint {
-  clan: number              // 0=BTC, 1=ETH
+  clan: number              // 0=BTC, 1=ETH, 2=SOL, 3=LINK, 4=DOGE, 5=PEPE
   temperament: number       // 0=Pessimistic, 1=Neutral, 2=Optimistic
   fortuneTier: number       // 0=Poor, 1=Normal, 2=Rich
   rarityTier: number        // 0=Common, 1=Rare, 2=Legendary
   birthTrendBps: number     // Birth time price change (basis points)
-  birthVolBucket: number    // Volatility bucket
+  birthVolBucket: number    // Volatility bucket (0=Low, 1=Mid, 2=High)
   epochId: bigint           // Market epoch ID
   entropy: bigint           // Random seed
 }

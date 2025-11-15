@@ -2,29 +2,10 @@ import { Contract } from 'ethers'
 import { useMemo } from 'react'
 import { useWallet } from './useWallet'
 import { CONTRACTS } from '../utils/constants'
-
-// Minimal ABI for VolatilityCats contract
-const CATS_ABI = [
-  'function mintCat(uint8 clan) external',
-  'function getCat(uint256 tokenId) external view returns (tuple(tuple(uint8 clan, uint8 temperament, uint8 fortuneTier, uint8 rarityTier, int32 birthTrendBps, uint32 birthVolBucket, uint64 epochId, uint64 entropy) imprint, tuple(uint32 power, uint16 season, uint8 rulesVersion, uint64 lastMissionDaily, uint64 lastMissionWeekly, uint64 lastMissionMonthly, bool rewarded) game))',
-  'function completeMission(uint256 tokenId, uint8 missionType) external',
-  'function claimReward(uint256 tokenId) external',
-  'function ownerOf(uint256 tokenId) external view returns (address)',
-  'function balanceOf(address owner) external view returns (uint256)',
-  'function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)',
-  'event CatMinted(uint256 indexed tokenId, address indexed owner, uint8 clan)',
-  'event MissionCompleted(uint256 indexed tokenId, uint8 missionType, uint256 newPower)',
-  'event RewardClaimed(uint256 indexed tokenId, address indexed owner, uint256 amount)',
-]
-
-// Minimal ABI for ChurrToken contract
-const CHURR_ABI = [
-  'function balanceOf(address account) external view returns (uint256)',
-  'function totalSupply() external view returns (uint256)',
-  'function decimals() external view returns (uint8)',
-  'function symbol() external view returns (string)',
-  'function name() external view returns (string)',
-]
+import { parseContractError, formatCooldownError } from '../utils/contractErrors'
+import { toast } from 'react-hot-toast'
+import VolatilityCatsABI from '../contracts/abis/VolatilityCats.json'
+import ChurrTokenABI from '../contracts/abis/ChurrToken.json'
 
 export function useContract() {
   const { getProvider, getSigner } = useWallet()
@@ -33,14 +14,14 @@ export function useContract() {
   const catsContract = useMemo(() => {
     if (!CONTRACTS.CATS) return null
     const provider = getProvider()
-    return new Contract(CONTRACTS.CATS, CATS_ABI, provider)
+    return new Contract(CONTRACTS.CATS, VolatilityCatsABI, provider)
   }, [getProvider])
 
   // Get ChurrToken contract (read-only)
   const churrContract = useMemo(() => {
     if (!CONTRACTS.CHURR) return null
     const provider = getProvider()
-    return new Contract(CONTRACTS.CHURR, CHURR_ABI, provider)
+    return new Contract(CONTRACTS.CHURR, ChurrTokenABI, provider)
   }, [getProvider])
 
   // Get VolatilityCats contract with signer (for write operations)
@@ -49,14 +30,25 @@ export function useContract() {
       throw new Error('Cats contract address not configured')
     }
     const signer = await getSigner()
-    return new Contract(CONTRACTS.CATS, CATS_ABI, signer)
+    return new Contract(CONTRACTS.CATS, VolatilityCatsABI, signer)
   }
 
   // Mint a cat
   const mintCat = async (clan: number) => {
-    const contract = await getCatsContractWithSigner()
-    const tx = await contract.mintCat(clan)
-    return tx
+    try {
+      const contract = await getCatsContractWithSigner()
+      const tx = await contract.mintRandomCat(clan)
+      
+      toast.loading('고양이 민팅 중...', { id: tx.hash })
+      await tx.wait()
+      toast.success('고양이가 성공적으로 민팅되었습니다! 🐱', { id: tx.hash })
+      
+      return tx
+    } catch (error: any) {
+      const message = parseContractError(error)
+      toast.error(message)
+      throw error
+    }
   }
 
   // Get cat data
@@ -67,18 +59,51 @@ export function useContract() {
     return await catsContract.getCat(tokenId)
   }
 
-  // Complete mission
+  // Complete mission (runMission in contract)
   const completeMission = async (tokenId: bigint, missionType: number) => {
-    const contract = await getCatsContractWithSigner()
-    const tx = await contract.completeMission(tokenId, missionType)
-    return tx
+    try {
+      // Check cooldown first
+      const remaining = await getRemainingCooldown(tokenId, missionType)
+      if (remaining > 0n) {
+        const message = formatCooldownError(Number(remaining))
+        toast.error(message)
+        throw new Error(message)
+      }
+
+      const contract = await getCatsContractWithSigner()
+      const tx = await contract.runMission(tokenId, missionType)
+      
+      const missionNames = ['Daily', 'Weekly', 'Monthly']
+      toast.loading(`${missionNames[missionType]} 미션 실행 중...`, { id: tx.hash })
+      await tx.wait()
+      toast.success('미션을 완료했습니다! 💪', { id: tx.hash })
+      
+      return tx
+    } catch (error: any) {
+      const message = parseContractError(error)
+      if (!message.includes('쿨다운')) {
+        toast.error(message)
+      }
+      throw error
+    }
   }
 
   // Claim reward
   const claimReward = async (tokenId: bigint) => {
-    const contract = await getCatsContractWithSigner()
-    const tx = await contract.claimReward(tokenId)
-    return tx
+    try {
+      const contract = await getCatsContractWithSigner()
+      const tx = await contract.claimReward(tokenId)
+      
+      toast.loading('보상 수령 중...', { id: tx.hash })
+      await tx.wait()
+      toast.success('보상을 받았습니다! 🎉', { id: tx.hash })
+      
+      return tx
+    } catch (error: any) {
+      const message = parseContractError(error)
+      toast.error(message)
+      throw error
+    }
   }
 
   // Get user's cat count
@@ -107,6 +132,38 @@ export function useContract() {
     return await churrContract.balanceOf(address)
   }
 
+  // Get Oracle Imprint details
+  const getOracleImprint = async (tokenId: bigint) => {
+    if (!catsContract) {
+      throw new Error('Cats contract not initialized')
+    }
+    return await catsContract.getOracleImprint(tokenId)
+  }
+
+  // Get Game State
+  const getGameState = async (tokenId: bigint) => {
+    if (!catsContract) {
+      throw new Error('Cats contract not initialized')
+    }
+    return await catsContract.getGameState(tokenId)
+  }
+
+  // Get remaining cooldown for a mission
+  const getRemainingCooldown = async (tokenId: bigint, missionType: number) => {
+    if (!catsContract) {
+      throw new Error('Cats contract not initialized')
+    }
+    return await catsContract.getRemainingCooldown(tokenId, missionType)
+  }
+
+  // Get reward amount (constant)
+  const getRewardAmount = async () => {
+    if (!catsContract) {
+      throw new Error('Cats contract not initialized')
+    }
+    return await catsContract.rewardAmount()
+  }
+
   return {
     catsContract,
     churrContract,
@@ -117,6 +174,10 @@ export function useContract() {
     getUserCatCount,
     getUserCatTokenIds,
     getChurrBalance,
+    getOracleImprint,
+    getGameState,
+    getRemainingCooldown,
+    getRewardAmount,
   }
 }
 

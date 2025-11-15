@@ -76,11 +76,11 @@ export const MISSION_NAMES = {
   [MISSION_TYPE.MONTHLY]: 'Monthly Mission',
 } as const
 
-// Cooldown Times (in seconds)
+// Cooldown Times (in seconds) - from VolatilityCats contract
 export const COOLDOWN_TIMES = {
-  [MISSION_TYPE.DAILY]: 12 * 60 * 60,    // 12 hours
-  [MISSION_TYPE.WEEKLY]: 24 * 60 * 60,   // 1 day
-  [MISSION_TYPE.MONTHLY]: 72 * 60 * 60,  // 3 days
+  [MISSION_TYPE.DAILY]: 12 * 60 * 60,      // 12 hours
+  [MISSION_TYPE.WEEKLY]: 7 * 24 * 60 * 60, // 7 days
+  [MISSION_TYPE.MONTHLY]: 30 * 24 * 60 * 60, // 30 days
 } as const
 
 // Game Constants

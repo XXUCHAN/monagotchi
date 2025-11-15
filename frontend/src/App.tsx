@@ -1,5 +1,6 @@
 import { usePrivy } from '@privy-io/react-auth'
 import { TrendingUp, Coins, Award } from 'lucide-react'
+import { Toaster } from 'react-hot-toast'
 import { Header } from './components/Header'
 import { HeroSection } from './components/HeroSection'
 import { FeatureCard } from './components/FeatureCard'
@@ -27,14 +28,48 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen text-white">
-      {/* Header - Fixed at Top */}
-      <Header 
-        authenticated={authenticated}
-        userAddress={user?.wallet?.address}
-        onLogin={login}
-        onLogout={logout}
+    <>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'rgba(31, 41, 55, 0.95)',
+            color: '#fff',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            padding: '16px',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+          loading: {
+            iconTheme: {
+              primary: '#fb5a49',
+              secondary: '#fff',
+            },
+          },
+        }}
       />
+      
+      <div className="min-h-screen text-white">
+        {/* Header - Fixed at Top */}
+        <Header 
+          authenticated={authenticated}
+          userAddress={user?.wallet?.address}
+          onLogin={login}
+          onLogout={logout}
+        />
 
       {/* Main Content - Add padding-top to account for fixed header */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 min-h-screen">
@@ -80,6 +115,7 @@ function App() {
         )}
       </main>
     </div>
+    </>
   )
 }
 
