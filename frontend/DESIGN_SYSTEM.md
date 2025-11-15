@@ -3,6 +3,7 @@
 ## 🎨 색상 팔레트
 
 ### 브랜드 컬러
+
 ```css
 primary:   #fb5a49  /* Coral Red - 주요 액션, CTA 버튼 */
 secondary: #fed16e  /* Sunshine Yellow - 보상, 성공 메시지 */
@@ -10,12 +11,14 @@ accent:    #f0b07d  /* Peach - 부드러운 강조, 호버 상태 */
 ```
 
 ### 컨텍스트 컬러
+
 ```css
 btc: #F7931A  /* Bitcoin Orange */
 eth: #627EEA  /* Ethereum Blue */
 ```
 
 ### 사용 가이드
+
 - **Primary (#fb5a49)**: 주요 버튼, 중요한 액션, 강조가 필요한 요소
 - **Secondary (#fed16e)**: 보상 알림, 성공 메시지, 긍정적 피드백
 - **Accent (#f0b07d)**: 호버 상태, 부드러운 강조, 보조 UI 요소
@@ -23,6 +26,7 @@ eth: #627EEA  /* Ethereum Blue */
 ## 🪟 글라스모피즘 (Glassmorphism)
 
 ### 핵심 스타일
+
 ```css
 backdrop-blur-md       /* 배경 블러 효과 */
 bg-white/10           /* 반투명 배경 */
@@ -33,6 +37,7 @@ shadow-glass          /* 글라스 그림자 */
 ### 컴포넌트별 적용
 
 #### 카드
+
 ```tsx
 // 기본 카드
 <div className="glass p-6">
@@ -46,6 +51,7 @@ shadow-glass          /* 글라스 그림자 */
 ```
 
 #### 버튼
+
 ```tsx
 import { glass } from './utils/designSystem'
 
@@ -66,10 +72,9 @@ import { glass } from './utils/designSystem'
 ```
 
 #### 헤더
+
 ```tsx
-<header className={glass.header}>
-  {/* 헤더 내용 */}
-</header>
+<header className={glass.header}>{/* 헤더 내용 */}</header>
 ```
 
 ## 🎭 아이콘
@@ -89,6 +94,7 @@ import { Cat, Wallet, Sparkles, Bitcoin, Zap } from 'lucide-react'
 ```
 
 ### 아이콘 컬러링
+
 ```tsx
 // Primary 컬러
 <Cat className="text-primary" size={24} />
@@ -106,6 +112,7 @@ import { Cat, Wallet, Sparkles, Bitcoin, Zap } from 'lucide-react'
 ## 📐 타이포그래피
 
 ### 헤딩
+
 ```tsx
 // H1 - 그라디언트 텍스트
 <h1 className="text-6xl font-bold text-gradient">
@@ -124,6 +131,7 @@ import { Cat, Wallet, Sparkles, Bitcoin, Zap } from 'lucide-react'
 ```
 
 ### 본문
+
 ```tsx
 // 일반 텍스트
 <p className="text-white/90">
@@ -144,6 +152,7 @@ import { Cat, Wallet, Sparkles, Bitcoin, Zap } from 'lucide-react'
 ## 🎬 애니메이션
 
 ### 호버 효과
+
 ```tsx
 // 스케일 애니메이션
 <div className="transition-transform duration-300 hover:scale-105">
@@ -157,15 +166,17 @@ import { Cat, Wallet, Sparkles, Bitcoin, Zap } from 'lucide-react'
 ```
 
 ### 로딩 상태
-```tsx
-import { Sparkles } from 'lucide-react'
 
-<Sparkles className="animate-spin text-primary" size={24} />
+```tsx
+import { Sparkles } from 'lucide-react';
+
+<Sparkles className="animate-spin text-primary" size={24} />;
 ```
 
 ## 📦 유틸리티 클래스
 
 ### 그라디언트 배경
+
 ```tsx
 // 메인 그라디언트 (body 기본값)
 <div className="bg-gradient-main">
@@ -178,6 +189,7 @@ import { Sparkles } from 'lucide-react'
 ```
 
 ### 간격
+
 ```tsx
 // 섹션 간격
 <section className="py-8 px-6">
@@ -192,32 +204,33 @@ import { Sparkles } from 'lucide-react'
 ## 🛠 디자인 시스템 사용 예시
 
 ### 전체 레이아웃
+
 ```tsx
-import { glass } from './utils/designSystem'
-import { Cat, Wallet } from 'lucide-react'
+import { glass } from './utils/designSystem';
+import { Cat, Wallet } from 'lucide-react';
 
 function MyComponent() {
-  return (
-    <div className="min-h-screen">
-      <header className={glass.header}>
-        <div className="container mx-auto px-6 py-4">
-          <Cat className="text-primary" size={32} />
-          <h1 className="text-gradient">Title</h1>
+    return (
+        <div className="min-h-screen">
+            <header className={glass.header}>
+                <div className="container mx-auto px-6 py-4">
+                    <Cat className="text-primary" size={32} />
+                    <h1 className="text-gradient">Title</h1>
+                </div>
+            </header>
+
+            <main className="container mx-auto px-6 py-12">
+                <div className="glass-hover p-8">
+                    <h2 className="text-3xl font-bold mb-4">Card Title</h2>
+                    <p className="text-white/80 mb-6">Content here</p>
+                    <button className={glass.button.primary}>
+                        <Wallet size={20} />
+                        <span>Action</span>
+                    </button>
+                </div>
+            </main>
         </div>
-      </header>
-      
-      <main className="container mx-auto px-6 py-12">
-        <div className="glass-hover p-8">
-          <h2 className="text-3xl font-bold mb-4">Card Title</h2>
-          <p className="text-white/80 mb-6">Content here</p>
-          <button className={glass.button.primary}>
-            <Wallet size={20} />
-            <span>Action</span>
-          </button>
-        </div>
-      </main>
-    </div>
-  )
+    );
 }
 ```
 
@@ -247,4 +260,3 @@ function MyComponent() {
 - [Tailwind CSS 공식 문서](https://tailwindcss.com)
 - [Lucide Icons](https://lucide.dev)
 - [Glassmorphism Generator](https://hype4.academy/tools/glassmorphism-generator)
-

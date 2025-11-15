@@ -25,49 +25,49 @@ src/
 ## 🧩 컴포넌트 상세
 
 ### 1. **Header** (Sticky Navigation)
+
 **파일**: `components/Header.tsx`
 
 상단에 고정되는 네비게이션 헤더입니다.
 
 ```tsx
 interface HeaderProps {
-  authenticated: boolean
-  userAddress?: string
-  onLogin: () => void
-  onLogout: () => void
+    authenticated: boolean;
+    userAddress?: string;
+    onLogin: () => void;
+    onLogout: () => void;
 }
 ```
 
 **특징:**
+
 - `sticky top-0 z-50` - 스크롤해도 상단 고정
 - `backdrop-blur-xl` - 글라스모피즘 효과
 - 로그인/로그아웃 상태에 따라 다른 UI 표시
 - 반응형 디자인 (모바일에서 지갑 주소 숨김)
 
 **사용 예시:**
+
 ```tsx
-<Header 
-  authenticated={authenticated}
-  userAddress={user?.wallet?.address}
-  onLogin={login}
-  onLogout={logout}
-/>
+<Header authenticated={authenticated} userAddress={user?.wallet?.address} onLogin={login} onLogout={logout} />
 ```
 
 ---
 
 ### 2. **HeroSection** (Landing Hero)
+
 **파일**: `components/HeroSection.tsx`
 
 랜딩 페이지의 메인 히어로 섹션입니다.
 
 ```tsx
 interface HeroSectionProps {
-  onGetStarted: () => void
+    onGetStarted: () => void;
 }
 ```
 
 **구성 요소:**
+
 - Live Badge (Monad Testnet)
 - 큰 타이틀 ("Trade volatility. Earn rewards.")
 - 설명 텍스트
@@ -77,53 +77,58 @@ interface HeroSectionProps {
 ---
 
 ### 3. **FeatureCard** (Reusable Card)
+
 **파일**: `components/FeatureCard.tsx`
 
 재사용 가능한 Feature 카드 컴포넌트입니다.
 
 ```tsx
 interface FeatureCardProps {
-  icon: LucideIcon
-  iconColor: string
-  iconBgColor: string
-  title: string
-  description: string
-  number: string
+    icon: LucideIcon;
+    iconColor: string;
+    iconBgColor: string;
+    title: string;
+    description: string;
+    number: string;
 }
 ```
 
 **특징:**
+
 - Lucide 아이콘 지원
 - 번호 표시 (01, 02, 03...)
 - 호버 효과 (glass-hover)
 - 커스터마이징 가능한 아이콘 색상
 
 **사용 예시:**
+
 ```tsx
-<FeatureCard 
-  icon={TrendingUp}
-  iconColor="text-btc"
-  iconBgColor="bg-btc/10 border border-btc/20"
-  title="Bitcoin Alignment"
-  description="Bet on orange coin supremacy..."
-  number="01"
+<FeatureCard
+    icon={TrendingUp}
+    iconColor="text-btc"
+    iconBgColor="bg-btc/10 border border-btc/20"
+    title="Bitcoin Alignment"
+    description="Bet on orange coin supremacy..."
+    number="01"
 />
 ```
 
 ---
 
 ### 4. **Dashboard** (Authenticated View)
+
 **파일**: `components/Dashboard.tsx`
 
 로그인 후 표시되는 대시보드 메인 화면입니다.
 
 ```tsx
 interface DashboardProps {
-  onMintCat: () => void
+    onMintCat: () => void;
 }
 ```
 
 **구성 요소:**
+
 - Dashboard Header (제목 + Mint Cat 버튼)
 - Quick Stats (4개의 StatsCard)
 - Your Cats 영역 (Empty State)
@@ -132,58 +137,53 @@ interface DashboardProps {
 ---
 
 ### 5. **StatsCard** (Statistics Display)
+
 **파일**: `components/StatsCard.tsx`
 
 통계를 표시하는 작은 카드 컴포넌트입니다.
 
 ```tsx
 interface StatsCardProps {
-  label: string
-  value: string | number
-  subtext: string
-  valueClassName?: string
+    label: string;
+    value: string | number;
+    subtext: string;
+    valueClassName?: string;
 }
 ```
 
 **사용 예시:**
+
 ```tsx
-<StatsCard 
-  label="Total Earned"
-  value="0 FISH"
-  subtext="$0.00 USD"
-  valueClassName="text-secondary"
-/>
+<StatsCard label="Total Earned" value="0 FISH" subtext="$0.00 USD" valueClassName="text-secondary" />
 ```
 
 ---
 
 ### 6. **MissionCard** (Mission Item)
+
 **파일**: `components/MissionCard.tsx`
 
 개별 미션을 표시하는 카드입니다.
 
 ```tsx
 interface MissionCardProps {
-  title: string
-  reward: string
-  progress?: number
-  completed?: boolean
+    title: string;
+    reward: string;
+    progress?: number;
+    completed?: boolean;
 }
 ```
 
 **특징:**
+
 - 진행률 바 (progress > 0일 때만 표시)
 - 완료 여부에 따른 opacity 조절
 - 그라디언트 진행률 바
 
 **사용 예시:**
+
 ```tsx
-<MissionCard 
-  title="Mint a Cat"
-  reward="+50 FISH"
-  progress={50}
-  completed={true}
-/>
+<MissionCard title="Mint a Cat" reward="+50 FISH" progress={50} completed={true} />
 ```
 
 ---
@@ -191,12 +191,15 @@ interface MissionCardProps {
 ## 🎨 컴포넌트 디자인 원칙
 
 ### 1. **단일 책임 원칙 (SRP)**
+
 각 컴포넌트는 하나의 명확한 역할만 수행합니다.
+
 - `Header` → 네비게이션
 - `StatsCard` → 통계 표시
 - `MissionCard` → 미션 표시
 
 ### 2. **Props 기반 커스터마이징**
+
 컴포넌트는 props를 통해 유연하게 커스터마이징 가능합니다.
 
 ```tsx
@@ -206,18 +209,20 @@ interface MissionCardProps {
 ```
 
 ### 3. **합성 가능 (Composable)**
+
 큰 컴포넌트는 작은 컴포넌트들로 구성됩니다.
 
 ```tsx
 // Dashboard는 StatsCard와 MissionCard를 사용
 <Dashboard>
-  <StatsCard />
-  <StatsCard />
-  <MissionCard />
+    <StatsCard />
+    <StatsCard />
+    <MissionCard />
 </Dashboard>
 ```
 
 ### 4. **TypeScript 타입 안정성**
+
 모든 Props는 명확한 타입 정의를 가집니다.
 
 ---
@@ -225,19 +230,16 @@ interface MissionCardProps {
 ## 📦 컴포넌트 Import 방법
 
 ### 방법 1: 개별 Import
+
 ```tsx
-import { Header } from './components/Header'
-import { Dashboard } from './components/Dashboard'
+import { Header } from './components/Header';
+import { Dashboard } from './components/Dashboard';
 ```
 
 ### 방법 2: Index Export 사용 (추천)
+
 ```tsx
-import { 
-  Header, 
-  HeroSection, 
-  FeatureCard, 
-  Dashboard 
-} from './components'
+import { Header, HeroSection, FeatureCard, Dashboard } from './components';
 ```
 
 ---
@@ -277,36 +279,40 @@ App.tsx (Root)
 ## 💡 베스트 프랙티스
 
 ### 1. 컴포넌트 네이밍
+
 - PascalCase 사용 (`Header`, `StatsCard`)
 - 명확하고 설명적인 이름
 - 파일명 = 컴포넌트명
 
 ### 2. Props 타입 정의
+
 ```tsx
 // ✅ Good
 interface HeaderProps {
-  authenticated: boolean
-  onLogin: () => void
+    authenticated: boolean;
+    onLogin: () => void;
 }
 
 // ❌ Bad
-function Header(props: any) { }
+function Header(props: any) {}
 ```
 
 ### 3. 재사용성
+
 공통 패턴을 발견하면 컴포넌트로 추출하세요.
 
 ```tsx
 // 반복되는 패턴 발견
 <div className="glass p-5 space-y-2">
-  <div className="text-white/60 text-sm">{label}</div>
-  <div className="text-3xl font-bold">{value}</div>
+    <div className="text-white/60 text-sm">{label}</div>
+    <div className="text-3xl font-bold">{value}</div>
 </div>
 
 // → StatsCard 컴포넌트로 추출
 ```
 
 ### 4. 상태 관리
+
 - 컴포넌트는 가능한 stateless하게
 - 상태는 부모 컴포넌트에서 관리
 - Props로 데이터와 이벤트 핸들러 전달
@@ -316,14 +322,15 @@ function Header(props: any) { }
 ## 🛠 유지보수 가이드
 
 ### 컴포넌트 수정 시
+
 1. Props 인터페이스 먼저 확인
 2. 타입 안정성 유지
 3. 기존 사용처 영향 확인
 4. Linter 오류 체크
 
 ### 새 컴포넌트 추가 시
+
 1. `components/` 폴더에 생성
 2. Props 인터페이스 정의
 3. `components/index.ts`에 export 추가
 4. 디자인 시스템 컬러/스타일 사용
-
