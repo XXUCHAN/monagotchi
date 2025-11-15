@@ -68,5 +68,9 @@ export enum MissionType {
 export enum Alignment {
   BTC = 0,
   ETH = 1,
+  SOL = 2,
+  LINK = 3,
+  DOGE = 4,
+  PEPE = 5,
 }
 

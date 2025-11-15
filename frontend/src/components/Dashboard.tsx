@@ -36,7 +36,7 @@ export function Dashboard({ onMintCat }: DashboardProps) {
         />
         <StatsCard 
           label="Total Earned"
-          value="0 FISH"
+          value="0 CHURR"
           subtext="$0.00 USD"
           valueClassName="text-secondary"
         />
@@ -77,18 +77,18 @@ export function Dashboard({ onMintCat }: DashboardProps) {
           <div className="space-y-3">
             <MissionCard 
               title="Mint a Cat"
-              reward="+50 FISH"
+              reward="+50 CHURR"
               progress={0}
               completed={true}
             />
             <MissionCard 
               title="Complete 3 Battles"
-              reward="+100 FISH"
+              reward="+100 CHURR"
               completed={false}
             />
             <MissionCard 
               title="Trade 5 Times"
-              reward="+200 FISH"
+              reward="+200 CHURR"
               completed={false}
             />
           </div>

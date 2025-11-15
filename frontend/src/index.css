@@ -4,7 +4,9 @@
 
 @layer base {
   body {
-    @apply bg-gradient-main min-h-screen;
+    @apply min-h-screen;
+    background: linear-gradient(135deg, #1a0e1f 0%, #2d1b3d 50%, #1f1228 100%);
+    background-attachment: fixed;
   }
 }
 

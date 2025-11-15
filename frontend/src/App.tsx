@@ -37,9 +37,9 @@ function App() {
       />
 
       {/* Main Content - Add padding-top to account for fixed header */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 min-h-[calc(100vh-4rem)]">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 min-h-screen">
         {!authenticated ? (
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center h-full">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[calc(100vh-8rem)]">
             {/* Left: Hero Section */}
             <HeroSection onGetStarted={login} />
 
@@ -68,13 +68,15 @@ function App() {
                 iconColor="text-secondary"
                 iconBgColor="bg-secondary/10 border border-secondary/20"
                 title="Daily Missions"
-                description="Complete challenges to earn $FISH tokens and unlock special rewards."
+                description="Complete challenges to earn $CHURR tokens and unlock special rewards."
                 number="03"
               />
             </div>
           </div>
         ) : (
-          <Dashboard onMintCat={handleMintCat} />
+          <div className="min-h-[calc(100vh-8rem)]">
+            <Dashboard onMintCat={handleMintCat} />
+          </div>
         )}
       </main>
     </div>
