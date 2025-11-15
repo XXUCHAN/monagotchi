@@ -1,12 +1,25 @@
 import { Cat } from 'lucide-react'
+import { useState } from 'react'
 import { StatsCard } from './StatsCard'
 import { MissionCard } from './MissionCard'
+import { useContract } from '../hooks'
+import { CLAN } from '../constants'
 
-interface DashboardProps {
-  onMintCat: () => void
-}
+export function Dashboard() {
+  const { mintCat } = useContract()
+  const [isMinting, setIsMinting] = useState(false)
 
-export function Dashboard({ onMintCat }: DashboardProps) {
+  const handleMintCat = async () => {
+    try {
+      setIsMinting(true)
+      // Default to BTC clan for now
+      await mintCat(CLAN.BTC)
+    } catch (error) {
+      console.error('Mint failed:', error)
+    } finally {
+      setIsMinting(false)
+    }
+  }
   return (
     <div className="space-y-6">
       {/* Dashboard Header */}
@@ -17,12 +30,13 @@ export function Dashboard({ onMintCat }: DashboardProps) {
         </div>
         
         <div className="flex gap-3">
-          <button 
-            onClick={onMintCat}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-accent font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5"
+          <button
+            onClick={handleMintCat}
+            disabled={isMinting}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-accent font-semibold hover:shadow-lg hover:shadow-primary/30 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Cat size={20} />
-            <span>Mint Cat</span>
+            <span>{isMinting ? 'Minting...' : 'Mint Cat'}</span>
           </button>
         </div>
       </div>
@@ -61,11 +75,12 @@ export function Dashboard({ onMintCat }: DashboardProps) {
             <div className="text-center space-y-3">
               <Cat className="mx-auto text-white/30" size={48} strokeWidth={1.5} />
               <p className="text-white/60">No cats yet</p>
-              <button 
-                onClick={onMintCat}
-                className="text-sm text-primary hover:text-accent transition-colors font-medium"
+              <button
+                onClick={handleMintCat}
+                disabled={isMinting}
+                className="text-sm text-primary hover:text-accent transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Mint your first cat →
+                {isMinting ? 'Minting...' : 'Mint your first cat →'}
               </button>
             </div>
           </div>
