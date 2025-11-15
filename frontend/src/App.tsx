@@ -53,10 +53,10 @@ function App() {
         ) : (
           <div className="min-h-[calc(100vh-8rem)]">
             <Dashboard />
-          </div>
+      </div>
         )}
       </main>
-    </div>
+      </div>
     </>
   )
 }
