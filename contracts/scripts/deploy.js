@@ -1,5 +1,7 @@
 const hre = require('hardhat');
 const { ethers } = hre;
+const fs = require('fs');
+const path = require('path');
 
 const REQUIRED_ASSETS = [
     {
@@ -81,6 +83,45 @@ async function configureAssets(registry, assets, { strict }) {
     }
 }
 
+function writeDeploymentArtifacts(networkName, addresses) {
+    const deploymentsDir = path.join(__dirname, '..', 'deployments');
+    fs.mkdirSync(deploymentsDir, { recursive: true });
+    const payload = {
+        network: networkName,
+        timestamp: new Date().toISOString(),
+        ...addresses,
+    };
+    const deploymentsPath = path.join(deploymentsDir, `${networkName}.json`);
+    fs.writeFileSync(deploymentsPath, JSON.stringify(payload, null, 2));
+    console.log(`Deployment info saved to ${path.relative(process.cwd(), deploymentsPath)}`);
+
+    if (networkName === 'localhost') {
+        const frontendPath = path.join(
+            __dirname,
+            '..',
+            '..',
+            'frontend',
+            'src',
+            'abi',
+            'local-addresses.json'
+        );
+        fs.mkdirSync(path.dirname(frontendPath), { recursive: true });
+        fs.writeFileSync(
+            frontendPath,
+            JSON.stringify(
+                {
+                    VolatilityCats: addresses.VolatilityCats,
+                    ChurrToken: addresses.ChurrToken,
+                    AssetRegistry: addresses.AssetRegistry,
+                },
+                null,
+                2
+            )
+        );
+        console.log(`Local addresses synced to ${path.relative(process.cwd(), frontendPath)}`);
+    }
+}
+
 async function main() {
     console.log('Volatility Cats 컨트랙트 배포 시작...');
 
@@ -134,6 +175,12 @@ async function main() {
     console.log('AssetRegistry 주소:', assetRegistryAddress);
     console.log('VolatilityCats 주소:', volatilityCatsAddress);
     console.log('====================');
+
+    writeDeploymentArtifacts(hre.network.name, {
+        ChurrToken: fishTokenAddress,
+        AssetRegistry: assetRegistryAddress,
+        VolatilityCats: volatilityCatsAddress,
+    });
 
     // 검증 (선택사항)
     console.log('\n컨트랙트 검증 중...');
