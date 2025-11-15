@@ -5,7 +5,7 @@
 - Node.js 18+
 - Hardhat 설치됨
 - Monad Testnet RPC 접근 가능
-- Chainlink Data Feeds 주소 확인됨
+- Chainlink Data Feeds 주소 (BTC/USD, ETH/USD 필수)
 - 테스트 ETH 보유 (Faucet: https://testnet.monad.xyz/faucet)
 
 ## 환경 설정
@@ -19,11 +19,14 @@ npm install
 
 # 환경변수 설정 (.env 파일 생성)
 cp .env.example .env
-# .env 파일에 실제 값들 입력:
+# 필수 ENV 예시 (테스트넷 기준)
 # MONAD_RPC_URL="https://rpc.testnet.monad.xyz"
 # MONAD_PRIVATE_KEY="0xYOUR_PRIVATE_KEY"
-# BTC_USD_FEED="0xBTC_FEED_ADDRESS"
-# ETH_USD_FEED="0xETH_FEED_ADDRESS"
+# BTC_USD_FEED="0x... 실제 Chainlink BTC/USD 피드 주소"
+# ETH_USD_FEED="0x... 실제 Chainlink ETH/USD 피드 주소"
+# 선택: SOL_USD_FEED, DOGE_USD_FEED, PEPE_USD_FEED, LINK_USD_FEED
+
+# (로컬 Hardhat) feed 주소가 없어도 됨. 스크립트/테스트가 MockV3Aggregator를 자동 배포.
 
 # 테스트 실행
 npm test
@@ -35,6 +38,8 @@ npm run deploy:local
 npm run deploy
 ```
 
+> ℹ️ `npm run deploy*` 스크립트는 `AssetRegistry`를 먼저 배포한 뒤 `.env`에 정의된 자산 목록을 등록합니다. 최소 `BTC_USD_FEED`, `ETH_USD_FEED`가 없으면 배포가 중단됩니다.
+
 ## Scenarios (PASS/FAIL) with steps and success criteria
 
 ### 시나리오 1: 고양이 민팅 및 기본 조회 ✅
@@ -43,9 +48,10 @@ npm run deploy
 
 **단계**:
 1. `ChurrToken` 컨트랙트 배포
-2. `VolatilityCats` 컨트랙트 배포 (ChurrToken 주소, 가격 피드 주소 전달)
-3. `mintRandomCat(0)` 호출하여 BTC 고양이 민팅
-4. `getCat(0)` 호출하여 민팅된 고양이 정보 조회
+2. `AssetRegistry` 배포 후 Chainlink 피드 등록
+3. `VolatilityCats` 컨트랙트 배포 (ChurrToken 주소, AssetRegistry 주소, epochWindow 전달)
+4. `mintRandomCat(0)` 호출하여 BTC 고양이 민팅
+5. `getCat(0)` 호출하여 민팅된 고양이 정보 조회
 
 **성공 기준**:
 - ✅ 민팅 트랜잭션 성공

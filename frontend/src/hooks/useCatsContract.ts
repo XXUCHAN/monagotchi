@@ -1,10 +1,12 @@
-import { Contract } from 'ethers';
+import { Contract, type InterfaceAbi } from 'ethers';
 import { useMemo } from 'react';
 import { toast } from 'react-hot-toast';
 import { useWallet } from './useWallet';
 import { CONTRACTS, TOAST_MESSAGES, MISSION_NAMES_KO } from '../constants';
 import { parseContractError, formatCooldownError } from '../lib/errors';
-import VolatilityCatsABI from '../contracts/abis/VolatilityCats.json';
+import VolatilityCatsArtifact from '../abi/VolatilityCats.json';
+
+const CATS_ABI = VolatilityCatsArtifact.abi as InterfaceAbi;
 
 /**
  * Custom Hook for VolatilityCats Contract Interactions
@@ -16,7 +18,7 @@ export function useCatsContract() {
   const catsContract = useMemo(() => {
     if (!CONTRACTS.CATS) return null;
     const provider = getProvider();
-    return new Contract(CONTRACTS.CATS, VolatilityCatsABI, provider);
+    return new Contract(CONTRACTS.CATS, CATS_ABI, provider);
   }, [getProvider]);
 
   // Get VolatilityCats contract with signer (for write operations)
@@ -25,7 +27,7 @@ export function useCatsContract() {
       throw new Error(TOAST_MESSAGES.ERROR_CONTRACT_NOT_CONFIGURED);
     }
     const signer = await getSigner();
-    return new Contract(CONTRACTS.CATS, VolatilityCatsABI, signer);
+    return new Contract(CONTRACTS.CATS, CATS_ABI, signer);
   };
 
   // ==================== Write Operations ====================

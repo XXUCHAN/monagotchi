@@ -7,9 +7,10 @@
         "doc": "docs"
     },
     "scripts": {
-        "test": "hardhat test",
-        "deploy": "hardhat run scripts/deploy.js --network monadTestnet",
-        "deploy:local": "hardhat run scripts/deploy.js --network localhost"
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js --network monadTestnet",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "build:abi": "hardhat compile && node scripts/export-abi.js"
     },
     "repository": {
         "type": "git",

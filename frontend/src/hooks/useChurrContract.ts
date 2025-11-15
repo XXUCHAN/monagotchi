@@ -1,8 +1,10 @@
-import { Contract } from 'ethers';
+import { Contract, type InterfaceAbi } from 'ethers';
 import { useMemo } from 'react';
 import { useWallet } from './useWallet';
 import { CONTRACTS } from '../constants';
-import ChurrTokenABI from '../contracts/abis/ChurrToken.json';
+import ChurrTokenArtifact from '../abi/ChurrToken.json';
+
+const CHURR_ABI = ChurrTokenArtifact.abi as InterfaceAbi;
 
 /**
  * Custom Hook for ChurrToken Contract Interactions
@@ -14,7 +16,7 @@ export function useChurrContract() {
   const churrContract = useMemo(() => {
     if (!CONTRACTS.CHURR) return null;
     const provider = getProvider();
-    return new Contract(CONTRACTS.CHURR, ChurrTokenABI, provider);
+    return new Contract(CONTRACTS.CHURR, CHURR_ABI, provider);
   }, [getProvider]);
 
   /**

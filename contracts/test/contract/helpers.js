@@ -5,6 +5,9 @@ const BTC_PRICE = 50_000n * 10n ** 8n;
 const ETH_PRICE = 3_500n * 10n ** 8n;
 const DEFAULT_EPOCH = 3600;
 
+const BTC_ASSET_ID = ethers.keccak256(ethers.toUtf8Bytes('BTC_USD'));
+const ETH_ASSET_ID = ethers.keccak256(ethers.toUtf8Bytes('ETH_USD'));
+
 async function deployCatsFixture() {
     const [owner, player, stranger] = await ethers.getSigners();
 
@@ -15,14 +18,43 @@ async function deployCatsFixture() {
     const btcFeed = await MockV3Aggregator.deploy(DECIMALS, BTC_PRICE);
     const ethFeed = await MockV3Aggregator.deploy(DECIMALS, ETH_PRICE);
 
+    const AssetRegistry = await ethers.getContractFactory('AssetRegistry');
+    const assetRegistry = await AssetRegistry.deploy();
+
+    await assetRegistry.addAsset(
+        BTC_ASSET_ID,
+        await btcFeed.getAddress(),
+        DECIMALS,
+        2,
+        5000
+    );
+    await assetRegistry.addAsset(
+        ETH_ASSET_ID,
+        await ethFeed.getAddress(),
+        DECIMALS,
+        2,
+        6000
+    );
+
     const VolatilityCats = await ethers.getContractFactory('VolatilityCats');
-    const cats = await VolatilityCats.deploy(await fishToken.getAddress(), DEFAULT_EPOCH);
+    const cats = await VolatilityCats.deploy(
+        await fishToken.getAddress(),
+        await assetRegistry.getAddress(),
+        DEFAULT_EPOCH
+    );
 
     await fishToken.transferOwnership(await cats.getAddress());
-    await cats.setClanFeed(0, await btcFeed.getAddress(), true);
-    await cats.setClanFeed(1, await ethFeed.getAddress(), true);
 
-    return { owner, player, stranger, fishToken, cats, btcFeed, ethFeed };
+    return {
+        owner,
+        player,
+        stranger,
+        fishToken,
+        cats,
+        btcFeed,
+        ethFeed,
+        assetRegistry,
+    };
 }
 
 async function mintCat(cats, signer, clan = 0) {
@@ -38,6 +70,8 @@ module.exports = {
     ETH_PRICE,
     DECIMALS,
     DEFAULT_EPOCH,
+    BTC_ASSET_ID,
+    ETH_ASSET_ID,
     deployCatsFixture,
     mintCat,
 };
