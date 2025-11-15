@@ -1,0 +1,324 @@
+openapi: 3.0.3
+info:
+  title: Volatility Cats Game Contracts API
+  version: 1.0.0
+  description: Monad Testnet 기반 소셜 펫 게임 스마트 컨트랙트 API
+
+servers:
+  - url: https://testnet.monad.xyz
+    description: Monad Testnet
+
+paths:
+  /volatility-cats/mint:
+    post:
+      summary: 새로운 고양이 민팅
+      operationId: mintRandomCat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MintRequest'
+      responses:
+        '200':
+          description: 민팅 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MintResponse'
+        '400':
+          $ref: '#/components/responses/InvalidClan'
+
+  /volatility-cats/{tokenId}/missions:
+    post:
+      summary: 미션 실행
+      operationId: runMission
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint256
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MissionRequest'
+      responses:
+        '200':
+          description: 미션 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MissionResponse'
+        '400':
+          $ref: '#/components/responses/NotOwner'
+        '429':
+          $ref: '#/components/responses/CooldownActive'
+
+  /volatility-cats/{tokenId}/rewards:
+    post:
+      summary: 보상 수령
+      operationId: claimReward
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint256
+      responses:
+        '200':
+          description: 보상 수령 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RewardResponse'
+        '400':
+          $ref: '#/components/responses/NotOwner'
+        '403':
+          $ref: '#/components/responses/PowerTooLow'
+
+  /volatility-cats/{tokenId}:
+    get:
+      summary: 고양이 정보 조회
+      operationId: getCat
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint256
+      responses:
+        '200':
+          description: 고양이 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatResponse'
+
+  /volatility-cats/{tokenId}/cooldowns/{missionType}:
+    get:
+      summary: 미션 쿨다운 잔여시간 조회
+      operationId: getRemainingCooldown
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint256
+        - name: missionType
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum: [0, 1, 2]  # 0=daily, 1=weekly, 2=monthly
+      responses:
+        '200':
+          description: 쿨다운 정보
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CooldownResponse'
+
+components:
+  schemas:
+    MintRequest:
+      type: object
+      required:
+        - clan
+      properties:
+        clan:
+          type: integer
+          enum: [0, 1]
+          description: "클랜: 0=BTC, 1=ETH (추후 SOL, MONAD 등 확장 가능)"
+
+    MintResponse:
+      type: object
+      required:
+        - tokenId
+        - transactionHash
+      properties:
+        tokenId:
+          type: integer
+          format: uint256
+        transactionHash:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{64}$'
+
+    MissionRequest:
+      type: object
+      required:
+        - missionType
+      properties:
+        missionType:
+          type: integer
+          enum: [0, 1, 2]
+          description: "0=daily, 1=weekly, 2=monthly"
+
+    MissionResponse:
+      type: object
+      required:
+        - powerGained
+        - newPower
+        - transactionHash
+      properties:
+        powerGained:
+          type: integer
+          format: uint32
+        newPower:
+          type: integer
+          format: uint32
+        transactionHash:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{64}$'
+
+    RewardResponse:
+      type: object
+      required:
+        - amount
+        - transactionHash
+      properties:
+        amount:
+          type: string
+          pattern: '^\d+(\.\d+)?$'
+        transactionHash:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{64}$'
+
+    CatResponse:
+      type: object
+      required:
+        - tokenId
+        - imprint
+        - game
+        - owner
+      properties:
+        tokenId:
+          type: integer
+          format: uint256
+        imprint:
+          type: object
+          required:
+            - clan
+            - temperament
+            - fortuneTier
+            - rarityTier
+            - birthTrendBps
+            - birthVolBucket
+            - epochId
+            - entropy
+          properties:
+            clan:
+              type: integer
+              description: "클랜: 0=BTC,1=ETH,2=SOL,3=MONAD..."
+            temperament:
+              type: integer
+              description: "성격: 0=비관,1=중립,2=낙관..."
+            fortuneTier:
+              type: integer
+              description: "포츈 티어: 0=가난,1=보통,2=부자"
+            rarityTier:
+              type: integer
+              description: "희귀도: 0=일반,1=레어,2=레전더리"
+            birthTrendBps:
+              type: integer
+              description: "탄생 시점 가격 변화율 (bps)"
+            birthVolBucket:
+              type: integer
+              description: "변동성 버킷 (0=Low,1=Mid,2=High,...)"
+            epochId:
+              type: integer
+              format: uint64
+              description: "시장 에폭 ID"
+            entropy:
+              type: string
+              description: "랜덤 시드 (hex 또는 uint 문자열)"
+        game:
+          type: object
+          required:
+            - power
+            - season
+            - rulesVersion
+            - lastMissionDaily
+            - lastMissionWeekly
+            - lastMissionMonthly
+            - rewarded
+          properties:
+            power:
+              type: integer
+              format: uint32
+            season:
+              type: integer
+              format: uint16
+            rulesVersion:
+              type: integer
+              format: uint8
+            lastMissionDaily:
+              type: integer
+              format: uint64
+            lastMissionWeekly:
+              type: integer
+              format: uint64
+            lastMissionMonthly:
+              type: integer
+              format: uint64
+            rewarded:
+              type: boolean
+        owner:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{40}$'
+
+    CooldownResponse:
+      type: object
+      required:
+        - remainingSeconds
+      properties:
+        remainingSeconds:
+          type: integer
+          format: uint256
+          description: "남은 쿨다운 시간 (초)"
+
+  responses:
+    InvalidClan:
+      description: 잘못된 clan 값
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotOwner:
+      description: 토큰 소유자가 아님
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    CooldownActive:
+      description: 쿨다운 중임
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    PowerTooLow:
+      description: 파워가 부족함
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string

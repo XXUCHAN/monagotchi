@@ -1,0 +1,287 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Volatility Cats Contract Schemas",
+  "description": "Volatility Cats 스마트 컨트랙트의 데이터 구조 및 API 스키마",
+
+  "definitions": {
+
+    "Clan": {
+      "type": "integer",
+      "enum": [0, 1],
+      "description": "고양이 클랜: 0=BTC, 1=ETH (추후 SOL, MONAD 등 확장 가능)"
+    },
+
+    "MissionType": {
+      "type": "integer",
+      "enum": [0, 1, 2],
+      "description": "미션 타입: 0=Daily, 1=Weekly, 2=Monthly"
+    },
+
+    "OracleImprint": {
+      "type": "object",
+      "required": ["clan", "temperament", "fortuneTier", "rarityTier", "birthTrendBps", "birthVolBucket", "epochId", "entropy"],
+      "properties": {
+        "clan": {
+          "$ref": "#/definitions/Clan"
+        },
+        "temperament": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "성격: 0=비관, 1=중립, 2=낙관"
+        },
+        "fortuneTier": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "포츈 티어: 0=가난, 1=보통, 2=부자"
+        },
+        "rarityTier": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2,
+          "description": "희귀도 티어: 0=일반, 1=레어, 2=레전더리"
+        },
+        "birthTrendBps": {
+          "type": "integer",
+          "minimum": -10000,
+          "maximum": 10000,
+          "description": "탄생 시점 가격 변화율 (basis points, ±100%)"
+        },
+        "birthVolBucket": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "변동성 버킷 (0=Low,1=Mid,2=High,...)"
+        },
+        "epochId": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "시장 에폭 ID (uint64)"
+        },
+        "entropy": {
+          "type": "string",
+          "description": "랜덤 시드 (uint64 또는 hex 문자열)"
+        }
+      }
+    },
+
+    "CatGameState": {
+      "type": "object",
+      "required": ["power", "season", "rulesVersion", "lastMissionDaily", "lastMissionWeekly", "lastMissionMonthly", "rewarded"],
+      "properties": {
+        "power": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "description": "현재 파워 레벨 (uint32)"
+        },
+        "season": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "시즌/버전 (uint16)"
+        },
+        "rulesVersion": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "룰셋 버전 (uint8)"
+        },
+        "lastMissionDaily": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "마지막 Daily 미션 타임스탬프 (uint64)"
+        },
+        "lastMissionWeekly": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "마지막 Weekly 미션 타임스탬프 (uint64)"
+        },
+        "lastMissionMonthly": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "마지막 Monthly 미션 타임스탬프 (uint64)"
+        },
+        "rewarded": {
+          "type": "boolean",
+          "description": "보상 수령 여부"
+        }
+      }
+    },
+
+    "VolatilityCat": {
+      "type": "object",
+      "required": ["tokenId", "imprint", "game", "owner"],
+      "properties": {
+        "tokenId": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "ERC721 토큰 ID"
+        },
+        "imprint": {
+          "$ref": "#/definitions/OracleImprint"
+        },
+        "game": {
+          "$ref": "#/definitions/CatGameState"
+        },
+        "owner": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "현재 소유자 주소"
+        }
+      }
+    },
+
+    "MissionCooldown": {
+      "type": "object",
+      "required": ["daily", "weekly", "monthly"],
+      "properties": {
+        "daily": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Daily 미션 남은 쿨다운 (초)"
+        },
+        "weekly": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Weekly 미션 남은 쿨다운 (초)"
+        },
+        "monthly": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Monthly 미션 남은 쿨다운 (초)"
+        }
+      }
+    },
+
+    "FishToken": {
+      "type": "object",
+      "required": ["name", "symbol", "decimals", "totalSupply"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["FishToken"]
+        },
+        "symbol": {
+          "type": "string",
+          "enum": ["FISH"]
+        },
+        "decimals": {
+          "type": "integer",
+          "enum": [18]
+        },
+        "totalSupply": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "총 공급량 (wei 단위)"
+        }
+      }
+    },
+
+    "ContractEvent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["event", "tokenId", "owner", "clan"],
+          "properties": {
+            "event": { "enum": ["CatMinted"] },
+            "tokenId": { "type": "string", "pattern": "^\\d+$" },
+            "owner": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+            "clan": { "$ref": "#/definitions/Clan" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["event", "tokenId", "missionType", "powerGained"],
+          "properties": {
+            "event": { "enum": ["MissionCompleted"] },
+            "tokenId": { "type": "string", "pattern": "^\\d+$" },
+            "missionType": { "$ref": "#/definitions/MissionType" },
+            "powerGained": { "type": "integer", "minimum": 1, "maximum": 5 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["event", "tokenId", "owner", "amount"],
+          "properties": {
+            "event": { "enum": ["RewardClaimed"] },
+            "tokenId": { "type": "string", "pattern": "^\\d+$" },
+            "owner": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+            "amount": { "type": "string", "pattern": "^\\d+$" }
+          }
+        }
+      ]
+    },
+
+    "ContractError": {
+      "type": "object",
+      "required": ["error", "message"],
+      "properties": {
+        "error": {
+          "type": "string",
+          "enum": [
+            "INVALID_CLAN",
+            "NOT_OWNER",
+            "INVALID_MISSION_TYPE",
+            "DAILY_COOLDOWN",
+            "WEEKLY_COOLDOWN",
+            "MONTHLY_COOLDOWN",
+            "POWER_TOO_LOW",
+            "ALREADY_CLAIMED"
+          ]
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "contracts": {
+      "type": "object",
+      "properties": {
+        "VolatilityCats": {
+          "type": "object",
+          "properties": {
+            "address": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "abi": {
+              "type": "array",
+              "description": "컨트랙트 ABI"
+            }
+          }
+        },
+        "FishToken": {
+          "type": "object",
+          "properties": {
+            "address": {
+              "type": "string",
+              "pattern": "^0x[a-fA-F0-9]{40}$"
+            },
+            "abi": {
+              "type": "array",
+              "description": "컨트랙트 ABI"
+            }
+          }
+        }
+      }
+    },
+    "priceFeeds": {
+      "type": "object",
+      "properties": {
+        "BTC_USD": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "BTC/USD Chainlink 가격 피드 주소"
+        },
+        "ETH_USD": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "ETH/USD Chainlink 가격 피드 주소"
+        }
+      }
+    }
+  }
+}
