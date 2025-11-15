@@ -78,7 +78,17 @@ cp .env.example .env
    npm run deploy           # MONAD_PRIVATE_KEY 및 feed 주소를 .env 에 설정해야 함
    npm run build:abi
    ```
-2. **프론트 설정**
+2. **최신 Dev 배포 주소 (2025-11-15 @ Monad Testnet)**
+
+| Contract | Address |
+| --- | --- |
+| VolatilityCats | `0xD3ca6b90b867b258cC67721520A6d75272c1114f` |
+| ChurrToken | `0x5d190a91F6f7D0658419E44919ee55381008F256` |
+| AssetRegistry | `0x7603b84A7ed60E814545e39229fd8f31ADc949aa` |
+
+> 배포 시 자동으로 생성되는 `contracts/deployments/monadTestnet.json`에도 동일한 값이 저장됩니다.
+
+3. **프론트 설정**
    ```bash
    cd ../frontend
    cp .env.example .env
@@ -87,7 +97,7 @@ cp .env.example .env
    npm install
    npm run dev
    ```
-3. **지갑 네트워크 스위치**
+4. **지갑 네트워크 스위치**
    - `useWallet` 훅의 `switchNetwork()`를 호출하면 Metamask에 Monad Testnet 체인을 추가/스위치합니다.
    - Privy Gas Tank를 사용하면 사용자의 가스 없이 트랜잭션 서명이 가능합니다.
 
