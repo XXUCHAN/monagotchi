@@ -1,6 +1,6 @@
 {
     "BTC_USD": "0x2Cd9D7E85494F68F5aF08EF96d6FD5e8F71B4d31",
-    "ETH_USD": "0x0c76859E85727683Eeba0C070Bc2e0F57B1337818",
+    "ETH_USD": "0xd6487BBC97429d6fE5d51352a63d4251bd76B99f",
     "LINK_USD": "0x46820359650Cd2D88759193ee26600d8A0766e1391",
     "USDC_USD": "0x70BB0758a38ae43418ffcEd9A25273d04e804D15",
     "USDT_USD": "0x14eE6bE30A919B8951Dc23203E41C804D4D71d441",
@@ -13,7 +13,7 @@
     "_note": "실제 Monad mainnet에서 Chainlink가 지원되면 이 주소들을 업데이트하세요",
     "_reference": "https://docs.chain.link/data-feeds/price-feeds/addresses",
     "_status": "mock-only",
-    "_rpc": "https://monad-testnet.gateway.tatum.io/",
+    "_rpc": "https://testnet-rpc.monad.xyz/",
     "_mock_prices": {
         "BTC_USD": 95000,
         "ETH_USD": 3200,

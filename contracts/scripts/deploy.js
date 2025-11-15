@@ -29,22 +29,51 @@ const zeroAddress = ethers.ZeroAddress;
 
 const toAssetId = (name) => ethers.keccak256(ethers.toUtf8Bytes(name));
 
+const DEFAULT_FEED_PRICES = {
+    BTC_USD: 95_000n * 10n ** 8n,
+    ETH_USD: 3_200n * 10n ** 8n,
+    SOL_USD: 180n * 10n ** 8n,
+    DOGE_USD: 35_000_000n, // 0.35 * 1e8
+    PEPE_USD: 1_200n, // 0.000012 * 1e8
+    LINK_USD: 18n * 10n ** 8n,
+};
+
+async function deployMockFeed(asset) {
+    const price = DEFAULT_FEED_PRICES[asset.name];
+    if (price === undefined) {
+        throw new Error(`Mock price not defined for ${asset.name}`);
+    }
+
+    const MockV3Aggregator = await ethers.getContractFactory('MockV3Aggregator');
+    const mock = await MockV3Aggregator.deploy(asset.decimals, price);
+    await mock.waitForDeployment();
+    const mockAddress = await mock.getAddress();
+    console.log(`- ${asset.name} (${asset.envKey}) 주소가 없어 MockV3Aggregator 배포 → ${mockAddress}`);
+    return mockAddress;
+}
+
 async function configureAssets(registry, assets, { strict }) {
     for (const asset of assets) {
-        const feed = process.env[asset.envKey];
+        const rawFeed = process.env[asset.envKey];
+        const feed = rawFeed ? rawFeed.trim() : '';
 
-        if (!feed || feed === zeroAddress) {
-            if (strict) {
-                throw new Error(`환경 변수 ${asset.envKey}가 설정되지 않았습니다.`);
-            }
+        let resolvedFeed;
+        if (feed && ethers.isAddress(feed)) {
+            resolvedFeed = ethers.getAddress(feed);
+        } else if (strict) {
+            resolvedFeed = await deployMockFeed(asset);
+        } else if (!feed || feed === zeroAddress) {
             console.log(`- ${asset.name} 주소가 없어 스킵합니다 (${asset.envKey})`);
+            continue;
+        } else {
+            console.log(`- ${asset.name} 주소 형식이 잘못되어 Mock 배포를 생략하고 스킵합니다 (${asset.envKey})`);
             continue;
         }
 
-        console.log(`- ${asset.name} (${asset.envKey}) 등록 중: ${feed}`);
+        console.log(`- ${asset.name} (${asset.envKey}) 등록 중: ${resolvedFeed}`);
         await registry.addAsset(
             toAssetId(asset.name),
-            feed,
+            resolvedFeed,
             asset.decimals,
             asset.volatilityTier,
             asset.maxExposureBps
